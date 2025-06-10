@@ -12,7 +12,19 @@ function GameCheck(board) {
     (one !== "" && one === five && five === nine) ||
     (three !== "" && three === five && five === seven)
   )
-    return true;
+    return "win";
+  else if (
+    one !== "" &&
+    two !== "" &&
+    three !== "" &&
+    four !== "" &&
+    five !== "" &&
+    six !== "" &&
+    seven !== "" &&
+    eight !== "" &&
+    nine !== ""
+  )
+    return "tie";
   else return false;
 }
 
