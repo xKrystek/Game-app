@@ -1,4 +1,5 @@
 import { createContext, useState } from "react";
+import { useForm } from "react-hook-form";
 
 export const TaskManagerContext = createContext(null);
 
@@ -14,6 +15,17 @@ function TaskManagerProvider({ children }) {
     eight: "",
     nine: "",
   });
+
+  const formData = useForm({
+    defaultValues: {
+      name: "",
+      label: "",
+      placeholder: "",
+      componentType: "",
+      type: "",
+    }
+  })
+
 
   const [player, setPlayer] = useState(true);
 

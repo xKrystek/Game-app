@@ -1,9 +1,14 @@
-import { useState } from "react";
 import Board from "./board/board";
 import "./App.css";
+import { Route, Routes } from "react-router-dom";
+import SignUp from "./pages/sign-up";
 
 function App() {
-  return <Board />;
+  return (
+    <Routes>
+      <Route path="/" element={<SignUp />} />
+    </Routes>
+  );
 }
 
 export default App;
