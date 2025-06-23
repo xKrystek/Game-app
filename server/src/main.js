@@ -1,8 +1,8 @@
 require("dotenv").config();
 const express = require("express");
-const jwt = require("jsonwebtoken");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
+const authRouter = require("./routes/auth-route");
 
 const app = express();
 require("./database");
@@ -17,6 +17,8 @@ app.use(
 
 app.use(cookieParser());
 app.use(express.json());
+
+app.use("/api", authRouter);
 
 
 

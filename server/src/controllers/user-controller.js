@@ -3,12 +3,8 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const joi = require("joi");
 
-const loginSchema = joi.object({
-  email: joi.string().email().required(),
-});
-
 const registerSchema = joi.object({
-  username: joi.object().string().required(),
+  name: joi.string().required(),
   email: joi.string().email().required(),
   password: joi.string().min(6).required(),
 });
@@ -20,18 +16,18 @@ const generateToken = (getId) => {
 };
 
 const registerUser = async (req, res) => {
-  const { username, password, email } = req.body;
+  const { name, password, email } = req.body;
 
-  const { error } = registerSchema.validate({ username, email, password });
+  const { error } = registerSchema.validate({ name, email, password });
 
   if (error)
-    res.status(400).json({
+    return res.status(400).json({
       success: false,
       message: error.details[0].message,
     });
 
   try {
-    const isEmailAlreadyInUse = user.findOne({ email });
+    const isEmailAlreadyInUse = await user.findOne({ email });
 
     if (isEmailAlreadyInUse) {
       return res.status(400).json({
@@ -41,8 +37,8 @@ const registerUser = async (req, res) => {
     } else {
       const hashedPassword = await bcrypt.hash(password, 12);
 
-      const newUser = user.create({
-        username,
+      const newUser = await user.create({
+        username: name,
         email,
         password: hashedPassword,
       });

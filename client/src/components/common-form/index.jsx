@@ -1,12 +1,11 @@
 import { Controller } from "react-hook-form";
 
 function CommonForm({ formControls = [], form, buttonText, handleSubmit }) {
-  console.log(form);
   return (
     <form onSubmit={form.handleSubmit(handleSubmit)} className="w-xl h-[300px] grid grid-cols-1 grid-rows-4">
       {formControls.map((controlItem, index) =>
         controlItem.componentType === "input" ? (
-          <div>
+          <div className="flex flex-col" key={index}>
             <label htmlFor={controlItem.name}>{controlItem.label}</label>
             <Controller
               control={form.control}
@@ -18,6 +17,7 @@ function CommonForm({ formControls = [], form, buttonText, handleSubmit }) {
                   placeholder={controlItem.placeholder}
                   onChange={field.onChange}
                   value={field.value}
+                  className="border-2 border-gray-500 rounded-[6px] p-2"
                 />
               )}
             ></Controller>
