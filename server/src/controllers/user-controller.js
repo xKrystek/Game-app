@@ -9,6 +9,11 @@ const registerSchema = joi.object({
   password: joi.string().min(6).required(),
 });
 
+const loginSchema = joi.object({
+  email: joi.string().email().required(),
+  password: joi.string().min(6).required(),
+});
+
 const generateToken = (getId) => {
   return jwt.sign({ getId }, "DEFAULT_SECRET_KEY", {
     expiresIn: 3 * 24 * 60 * 60,
@@ -67,4 +72,50 @@ const registerUser = async (req, res) => {
   }
 };
 
-module.exports = { registerUser };
+const loginUser = async (req, res) => {
+  const { password, email } = req.body;
+
+  const { error } = loginSchema.validate({ email, password });
+
+  if (error)
+    return res.status(400).json({
+      success: false,
+      message: error.details[0].message,
+    });
+
+  try {
+    const userExists = await user.findOne({ email });
+
+    if (userExists) {
+      const comparePasswords = await bcrypt.compare(
+        password,
+        userExists.password
+      );
+
+      if (comparePasswords) {
+        return res.status(200).json({
+          success: true,
+          message: "User logged in successfully",
+        });
+      } else {
+        return res.status(200).json({
+          success: false,
+          message: "Passwords do not match",
+        });
+      }
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: "Wrong credentials",
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Some error occured",
+    });
+  }
+};
+
+module.exports = { registerUser, loginUser };

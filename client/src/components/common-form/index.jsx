@@ -2,7 +2,7 @@ import { Controller } from "react-hook-form";
 
 function CommonForm({ formControls = [], form, buttonText, handleSubmit }) {
   return (
-    <form onSubmit={form.handleSubmit(handleSubmit)} className="w-xl h-[300px] grid grid-cols-1 grid-rows-4">
+    <form onSubmit={form.handleSubmit(handleSubmit)} className="w-xl h-[300px] grid grid-cols-1">
       {formControls.map((controlItem, index) =>
         controlItem.componentType === "input" ? (
           <div className="flex flex-col" key={index}>

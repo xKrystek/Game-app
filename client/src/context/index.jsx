@@ -23,9 +23,8 @@ function TaskManagerProvider({ children }) {
       placeholder: "",
       componentType: "",
       type: "",
-    }
-  })
-
+    },
+  });
 
   const [player, setPlayer] = useState(true);
 
