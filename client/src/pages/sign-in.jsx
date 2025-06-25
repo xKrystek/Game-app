@@ -2,19 +2,16 @@ import { useForm } from "react-hook-form";
 import { signInControls } from "../config";
 import CommonForm from "../components/common-form";
 import { callLoginUserApi } from "../services/index";
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { TaskManagerContext } from "../context";
 
-function SignUp() {
+function SignIn() {
   const formData = useForm({
     defaultValues: {
       email: "",
       password: "",
     },
   });
-
-  const { isLoggingView, setIsLoggingView } = useContext(TaskManagerContext);
 
   const [error, setError] = useState(null);
   const [done, setDone] = useState(null);
@@ -37,8 +34,6 @@ function SignUp() {
     }
   }
 
-
-
   return (
     <div className="flex flex-col items-center justify-center">
       <CommonForm
@@ -52,16 +47,8 @@ function SignUp() {
       ) : (
         done && <p className="text-center mt-2">{done}</p>
       )}
-      <button
-        onClick={() => {
-          navigate("/sign-up");
-        }}
-        className="w-[300px] mt-3"
-      >
-        Go to Sign up
-      </button>
     </div>
   );
 }
 
-export default SignUp;
+export default SignIn;

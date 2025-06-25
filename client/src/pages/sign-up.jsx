@@ -48,14 +48,6 @@ function SignUp() {
       ) : (
         done && <p className="text-center mt-2">{done}</p>
       )}
-      <button
-        onClick={() => {
-          navigate("/");
-        }}
-        className="w-[300px] mt-3"
-      >
-        Go to Sign in
-      </button>
     </div>
   );
 }

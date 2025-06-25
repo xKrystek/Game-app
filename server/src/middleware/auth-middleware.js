@@ -13,20 +13,25 @@ const authMiddleware = async (req, res) => {
 
   try {
     const decoded = jwt.verify(token, "DEFAULT_SECRET_KEY");
-    const userCredentials = user.findById(decoded.getId);
+    const userCredentials = await user.findById(decoded.getId);
 
     if (userCredentials) {
       return res.status(200).json({
         success: true,
         userCredentials,
       });
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: "User not authenticated",
+      });
     }
   } catch (e) {
     console.log(e);
     return res.status(500).json({
       success: false,
-      message: "User not authenticated",
-    });
+      message: "Something went wrong"
+    })
   }
 };
 

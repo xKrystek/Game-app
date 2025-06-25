@@ -93,6 +93,8 @@ const loginUser = async (req, res) => {
       );
 
       if (comparePasswords) {
+        const token = generateToken(userExists._id);
+        res.cookie("token", token);
         return res.status(200).json({
           success: true,
           message: "User logged in successfully",
