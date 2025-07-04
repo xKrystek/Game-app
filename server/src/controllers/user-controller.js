@@ -100,7 +100,7 @@ const loginUser = async (req, res) => {
           message: "User logged in successfully",
         });
       } else {
-        return res.status(200).json({
+        return res.status(400).json({
           success: false,
           message: "Passwords do not match",
         });

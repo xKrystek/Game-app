@@ -43,5 +43,6 @@ export const callUserAuthApi = async () => {
     return response?.data;
   } catch (e) {
     console.log(e);
+    return e;
   }
 };

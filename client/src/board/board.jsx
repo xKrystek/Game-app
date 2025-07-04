@@ -1,6 +1,6 @@
 import { useContext, useState } from "react";
 import { TaskManagerContext } from "../context";
-import GameCheck from "../game";
+import GameCheck from "./game-check";
 
 function Board() {
   const { board, setBoard, player, setPlayer } = useContext(TaskManagerContext);

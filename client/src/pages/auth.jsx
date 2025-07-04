@@ -1,6 +1,6 @@
 import { useState } from "react";
-import SignIn from "../sign-in";
-import SignUp from "../sign-up";
+import SignIn from "./sign-in";
+import SignUp from "./sign-up";
 
 function Authpage() {
   const [loggingView, setLoggingView] = useState(true);
