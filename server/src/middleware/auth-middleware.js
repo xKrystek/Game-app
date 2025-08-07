@@ -4,6 +4,8 @@ const user = require("../models/User");
 const authMiddleware = async (req, res) => {
   const token = req.cookies.token;
 
+  console.log(req.ip);
+
   if (!token) {
     return res.status(401).json({
       success: false,
@@ -30,8 +32,8 @@ const authMiddleware = async (req, res) => {
     console.log(e);
     return res.status(500).json({
       success: false,
-      message: "Something went wrong"
-    })
+      message: "Something went wrong",
+    });
   }
 };
 
