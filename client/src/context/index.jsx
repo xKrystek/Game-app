@@ -43,12 +43,12 @@ function TaskManagerProvider({ children }) {
       const response = await callUserAuthApi();
 
       if (response?.userCredentials) setUser(response?.userCredentials);
-      console.log(location);
+      // console.log(location);
 
       return response?.success
         ? navigate(
             location.pathname === "/" || location.pathname === "/auth"
-              ? "/tic-tac-toe"
+              ? "/games"
               : `${location.pathname}`
           )
         : navigate("/auth")
@@ -58,7 +58,7 @@ function TaskManagerProvider({ children }) {
 
   return (
     <TaskManagerContext.Provider
-      value={{ board, setBoard, player, setPlayer, user, loading, setLoading, LoggingView, setLoggingView }}
+      value={{ board, setBoard, player, setPlayer, user, loading, setLoading, LoggingView, setLoggingView, location }}
     >
       {children}
     </TaskManagerContext.Provider>

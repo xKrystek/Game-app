@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useId, useState } from "react";
 import { TaskManagerContext } from "../context";
 import GameCheck from "./game-check";
 
@@ -11,6 +11,8 @@ function Board() {
 
   function handleBoardOnClick(event) {
     const cell = event.target.classList[4];
+    // console.log(event.target);
+    // console.log(cell);
     if (board[cell]) return; // prevent overriding a filled cell
 
     const mark = player ? "O" : "X";
@@ -109,14 +111,7 @@ function Board() {
         >
           Play Again
         </button>
-      ) : (
-        <button
-          onClick={handleButtonClick}
-          className="hidden text-4xl mt-30 cursor-pointer text-nowrap absolute left-1/2 translate-x-[-50%] "
-        >
-          Play Again
-        </button>
-      )}
+      ) : null}
     </>
   );
 }

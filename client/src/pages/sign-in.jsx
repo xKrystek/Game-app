@@ -25,7 +25,7 @@ function SignIn() {
         formData.reset();
         setDone(response.message);
         setError(null); // Clear error if any
-        navigate("/tic-tac-toe");
+        navigate("/games");
       } else {
         setError(response.response.data.message || "Something went wrong.");
       }

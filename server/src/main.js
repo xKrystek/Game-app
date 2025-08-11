@@ -33,27 +33,33 @@ const io = new Server(httpserver, {
 
 let RoomsIndex = 0;
 
+let fullChat = [];
+
 io.on("connection", (socket) => {
     RoomsIndex++;
     socket.join(`room${RoomsIndex}`);
 
+
     if(RoomsIndex > 1) socket.join([`room${RoomsIndex}`, `room${RoomsIndex - 1}`]);
 
-    console.log(io.sockets.adapter.rooms);
+    console.log(io.sockets.adapter.rooms, "all rooms");
+    console.log(io.sockets.adapter.rooms.size, "amount of rooms");
+    console.log(io.sockets.adapter.rooms.get("room1").size, "size of room1");
 
     socket.emit("user-joined", "hello");
 
-    console.log(io.sockets.adapter.sids.size);
+    console.log(io.sockets.adapter.sids.size, "Number of sockets");
 
     socket.on("send-message", (arrayOfMessages) => {
-      console.log(arrayOfMessages);
-      io.to("room1").emit("receive-chat", arrayOfMessages);
+      fullChat.push(arrayOfMessages);
+      console.log(arrayOfMessages, "messages");
+      io.to("room1").emit("send-message", fullChat);
     })
 
     socket.on("disconnect", () => {
       RoomsIndex--;
-      fullChat = [];
       io.to("room1").emit("receive-chat", fullChat);
+      console.log("disconnected");
     })
 })
 
