@@ -17,7 +17,7 @@ function TaskManagerProvider({ children }) {
     eight: "",
     nine: "",
   });
-
+  
   const formData = useForm({
     defaultValues: {
       name: "",
@@ -42,16 +42,22 @@ function TaskManagerProvider({ children }) {
     const verifyCookie = async () => {
       const response = await callUserAuthApi();
 
+      console.log("called");
+      console.log(location.pathname);
+
+
       if (response?.userCredentials) setUser(response?.userCredentials);
       // console.log(location);
+
+      console.log(response, "true hunting");
 
       return response?.success
         ? navigate(
             location.pathname === "/" || location.pathname === "/auth"
               ? "/games"
-              : `${location.pathname}`
+              : `${location.pathname}`, {replace: true}
           )
-        : navigate("/auth")
+        : navigate("/auth", {replace: true});
     };
     verifyCookie();
   }, [location.pathname, navigate]);

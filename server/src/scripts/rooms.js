@@ -27,7 +27,7 @@ function room_join(rooms, roomsIndex){
         return `${result}`;
     } 
 
-    return;
+    return `room${++roomsIndex}`;
 }
 
 // const roomsSubsitute = new Map([

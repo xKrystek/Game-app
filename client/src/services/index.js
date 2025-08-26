@@ -34,11 +34,29 @@ export const callLoginUserApi = async (formData) => {
   }
 };
 
+// export const callUserAuthApi = async () => {
+//   try {
+//     const response = await axios.get("http://localhost:5000/api/auth", {
+//       withCredentials: true,
+//     });
+
+//     return response?.data;
+//   } catch (e) {
+//     console.log(e);
+//     return e;
+//   }
+// };
+
 export const callUserAuthApi = async () => {
   try {
     const response = await axios.get("http://localhost:5000/api/auth", {
-      withCredentials: true,
-    });
+  withCredentials: true,
+  headers: {
+    "Cache-Control": "no-cache, no-store, must-revalidate",
+    Pragma: "no-cache",
+    Expires: "0",
+  },
+});
 
     return response?.data;
   } catch (e) {
@@ -46,3 +64,16 @@ export const callUserAuthApi = async () => {
     return e;
   }
 };
+
+export const callLogoutUser = async () => {
+  try{
+    const response = await axios.post("http://localhost:5000/api/logout", {}, {
+      withCredentials: true,
+    });
+    console.log("logged Out");
+    return response?.data;
+  }  catch (e){
+    console.log(e);
+    return e;
+  }
+}

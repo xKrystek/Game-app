@@ -21,6 +21,13 @@ app.use(
 app.use(cookieParser());
 app.use(express.json());
 
+app.use((req, res, next) => {
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
+  next();
+});
+
 app.use("/api", authRouter);
 
 const httpserver = http.createServer(app);
@@ -40,10 +47,9 @@ let fullChat = [];
 // Connection
 io.on("connection", (socket) => {
   
-  let roomToJoin = room_join(io.sockets.adapter.rooms, RoomsIndex);
+  const roomToJoin = room_join(io.sockets.adapter.rooms, RoomsIndex);
   
-  if(roomToJoin) socket.join(`${roomToJoin}`);
-  else socket.join(`room${++RoomsIndex}`);
+  socket.join(`${roomToJoin}`);
   
   // Console logs
   console.log(io.sockets.adapter.rooms, "all rooms");
@@ -51,26 +57,27 @@ io.on("connection", (socket) => {
   console.log(io.sockets.adapter.rooms.get("room1")?.size, "size of room1");
   
   // Emits
-  socket.emit("user-joined", "hello");
+  // socket.emit("user-joined", "hello");
   
   console.log(io.sockets.adapter.sids.size, "Number of sockets");
   
-  // Ons
+  // On received event
   socket.on("send-message", (arrayOfMessages) => {
     fullChat.push(arrayOfMessages);
     console.log(arrayOfMessages, "messages");
-    io.to("room1").emit("send-message", fullChat);
+    io.to(`${roomToJoin}`).emit("send-message", fullChat);
   });
   
   // Disconnected
   socket.on("disconnect", () => {
-    io.to("room1").emit("receive-chat", fullChat);
+    fullChat = [];
+    io.to(`${roomToJoin}`).emit("receive-chat", fullChat);
     console.log("disconnected");
     console.log(io.sockets.adapter.rooms, "all rooms");
     console.log(io.sockets.adapter.rooms.size, "amount of rooms");
-    console.log(io.sockets.adapter.rooms.get("room1")?.size, "size of room1");
+    // console.log(io.sockets.adapter.rooms.get("room1")?.size, "size of room1");
   });
-  console.log(socket.rooms);
+  console.log(socket.rooms, "rooms the socket is joined to");
 });
 
 const PORT = process.env.PORT || 5000;

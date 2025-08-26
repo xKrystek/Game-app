@@ -1,6 +1,7 @@
 import { useContext, useId, useState } from "react";
 import { TaskManagerContext } from "../context";
 import GameCheck from "./game-check";
+import { callLogoutUser } from "../services";
 
 function Board() {
   const { board, setBoard, player, setPlayer } = useContext(TaskManagerContext);
@@ -51,6 +52,7 @@ function Board() {
 
   return (
     <>
+      <button onClick={callLogoutUser} className="absolute top-5">LogOut</button>
       <div
         onClick={
           !GameCheck(board) ? (event) => handleBoardOnClick(event) : null
