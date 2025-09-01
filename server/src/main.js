@@ -45,39 +45,58 @@ let fullChat = [];
 
 
 // Connection
-io.on("connection", (socket) => {
-  
-  const roomToJoin = room_join(io.sockets.adapter.rooms, RoomsIndex);
+
+const TIC_TAC_TOE = io.of("/tic-tac-toe");
+
+TIC_TAC_TOE.on("connection", (socket) => {
+
+  // join room
+  const roomToJoin = room_join(TIC_TAC_TOE.adapter.rooms, RoomsIndex);
   
   socket.join(`${roomToJoin}`);
   
   // Console logs
-  console.log(io.sockets.adapter.rooms, "all rooms");
-  console.log(io.sockets.adapter.rooms.size, "amount of rooms");
-  console.log(io.sockets.adapter.rooms.get("room1")?.size, "size of room1");
+  console.log(TIC_TAC_TOE.adapter.rooms, "all rooms");
+  console.log(TIC_TAC_TOE.adapter.rooms.size, "amount of rooms");
+  console.log(TIC_TAC_TOE.adapter.rooms.get("room1")?.size, "size of room1");
+  console.log(TIC_TAC_TOE.adapter.sids.size, "Number of sockets");
+  console.log(socket.rooms, "rooms the socket is joined to");
   
-  // Emits
-  // socket.emit("user-joined", "hello");
-  
-  console.log(io.sockets.adapter.sids.size, "Number of sockets");
+  // Board logic
+  // let Board = {
+  //   one: "",
+  //   two: "",
+  //   three: "",
+  //   four: "",
+  //   five: "",
+  //   six: "",
+  //   seven: "",
+  //   eight: "",
+  //   nine: "",
+  // }
+  socket.on("player-move", (board) => {
+    TIC_TAC_TOE.to(`${roomToJoin}`).emit("player-move", board);
+  })
+
+  socket.on("play-again", (again) => {
+    TIC_TAC_TOE.to(`${roomToJoin}`).emit("play-again", again)
+  })
   
   // On received event
   socket.on("send-message", (arrayOfMessages) => {
     fullChat.push(arrayOfMessages);
     console.log(arrayOfMessages, "messages");
-    io.to(`${roomToJoin}`).emit("send-message", fullChat);
+    TIC_TAC_TOE.to(`${roomToJoin}`).emit("send-message", fullChat);
   });
   
   // Disconnected
   socket.on("disconnect", () => {
     fullChat = [];
-    io.to(`${roomToJoin}`).emit("receive-chat", fullChat);
+    TIC_TAC_TOE.to(`${roomToJoin}`).emit("send-message", fullChat);
     console.log("disconnected");
-    console.log(io.sockets.adapter.rooms, "all rooms");
-    console.log(io.sockets.adapter.rooms.size, "amount of rooms");
-    // console.log(io.sockets.adapter.rooms.get("room1")?.size, "size of room1");
+    console.log(TIC_TAC_TOE.adapter.rooms, "all rooms");
+    console.log(TIC_TAC_TOE.adapter.rooms.size, "amount of rooms");
   });
-  console.log(socket.rooms, "rooms the socket is joined to");
 });
 
 const PORT = process.env.PORT || 5000;

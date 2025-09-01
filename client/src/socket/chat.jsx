@@ -1,29 +1,15 @@
-import React, { useEffect, useRef, useState } from "react";
-import io from "socket.io-client";
+import React, { useContext, useEffect, useRef, useState } from "react";
+import { TaskManagerContext } from "../context/taskManager";
 
 function Chat() {
+  const { socketRef, chat, setChat } = useContext(TaskManagerContext);
   const [inputDisplay, setInputDisplay] = useState("");
   const [message, setMessage] = useState({ sender: null, message: null });
-  const [chat, setChat] = useState([]);
-  const socketRef = useRef(null);
   const messagesEndRef = useRef(null);
 
-  // Connect to socket
   useEffect(() => {
-    socketRef.current = io("http://localhost:5000");
-
-    socketRef.current.on("connect", () => {
-      console.log(socketRef.current.id, "socket id");
-    });
-
-    socketRef.current.on("send-message", (fullchat) => {
-      setChat(fullchat);
-    });
-
-    return () => {
-      socketRef.current?.disconnect();
-    };
-  }, []);
+    return () => setChat([]);
+  }, [])
 
   // Emit new message
   useEffect(() => {
@@ -71,7 +57,10 @@ function Chat() {
           placeholder="Enter the message"
           className="border-2 p-1 flex-1 rounded"
         />
-        <button onClick={sendMessage} className="bg-blue-500 text-white px-2 rounded">
+        <button
+          onClick={sendMessage}
+          className="bg-blue-500 text-white px-2 rounded"
+        >
           Send
         </button>
       </div>

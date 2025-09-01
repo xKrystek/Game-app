@@ -1,63 +1,80 @@
-import { useContext, useId, useState } from "react";
-import { TaskManagerContext } from "../context";
-import GameCheck from "./game-check";
+import { useContext, useEffect } from "react";
+import { TaskManagerContext } from "../context/taskManager";
 import { callLogoutUser } from "../services";
+import Chat from "../socket/chat";
 
 function Board() {
-  const { board, setBoard, player, setPlayer } = useContext(TaskManagerContext);
+  const { board, player, setPlayer, win, tie, displayBtn, setDisplayBtn, handleBoardOnClick, playAgainButton, GameCheck, setWin } = useContext(TaskManagerContext);
 
-  const [win, setWin] = useState(false);
-  const [tie, setTie] = useState(false);
-  const [displayBtn, setDisplayBtn] = useState(false);
+  // const [win, setWin] = useState(false);
+  // const [tie, setTie] = useState(false);
+  // const [displayBtn, setDisplayBtn] = useState(false);
 
-  function handleBoardOnClick(event) {
-    const cell = event.target.classList[4];
-    // console.log(event.target);
-    // console.log(cell);
-    if (board[cell]) return; // prevent overriding a filled cell
+  // function handleBoardOnClick(event) {
+  //   const cell = event.target.classList[4];
+  //   // console.log(event.target);
+  //   // console.log(cell);
+  //   if (board[cell]) return; // prevent overriding a filled cell
 
-    const mark = player ? "O" : "X";
-    const updatedBoard = { ...board, [cell]: mark };
+  //   const mark = player ? "O" : "X";
+  //   const updatedBoard = { ...board, [cell]: mark };
 
-    setBoard(updatedBoard); // triggers re-render with new state
+  //   setBoard(updatedBoard); // triggers re-render with new state
 
-    if (!GameCheck(updatedBoard)) {
+  //   if (!GameCheck(updatedBoard)) {
+  //     setPlayer(!player);
+  //   } else if (GameCheck(updatedBoard) === "win") {
+  //     setWin(!win);
+  //     setDisplayBtn(true);
+  //   } else {
+  //     setTie(!tie);
+  //     setDisplayBtn(true);
+  //   }
+  // }
+
+  // function playAgainButton() {
+  //   setBoard({
+  //     one: "",
+  //     two: "",
+  //     three: "",
+  //     four: "",
+  //     five: "",
+  //     six: "",
+  //     seven: "",
+  //     eight: "",
+  //     nine: "",
+  //   });
+
+  //   setDisplayBtn(false);
+  //   setWin(false);
+  //   setTie(false);
+  // }
+
+  useEffect(() => {
+
+    console.log(player, "player");
+
+    if (!GameCheck(board)) {
       setPlayer(!player);
-    } else if (GameCheck(updatedBoard) === "win") {
+    } else if (GameCheck(board) === "win") {
       setWin(!win);
       setDisplayBtn(true);
     } else {
       setTie(!tie);
       setDisplayBtn(true);
     }
-  }
-
-  function handleButtonClick() {
-    setBoard({
-      one: "",
-      two: "",
-      three: "",
-      four: "",
-      five: "",
-      six: "",
-      seven: "",
-      eight: "",
-      nine: "",
-    });
-
-    setDisplayBtn(false);
-    setWin(false);
-    setTie(false);
-  }
+  }, [board])
 
   return (
     <>
-      <button onClick={callLogoutUser} className="absolute top-5">LogOut</button>
+      <button onClick={callLogoutUser} className="absolute top-5">
+        LogOut
+      </button>
       <div
         onClick={
           !GameCheck(board) ? (event) => handleBoardOnClick(event) : null
         }
-        className="text-9xl text-center grid grid-cols-3 grid-rows-3 gap-3 w-[811px] h-[811px] relative bottom-12"
+        className="text-8xl text-center grid grid-cols-3 grid-rows-3 gap-3 w-[611px] h-[611px] relative bottom-12"
       >
         <div className="border-solid border-3 border-white place-content-center one">
           {board.one}
@@ -108,12 +125,13 @@ function Board() {
       </div>
       {displayBtn ? (
         <button
-          onClick={handleButtonClick}
+          onClick={playAgainButton}
           className="animation2 text-4xl mt-25 cursor-pointer text-nowrap absolute left-1/2 translate-x-[-50%] "
         >
           Play Again
         </button>
       ) : null}
+      <Chat />
     </>
   );
 }

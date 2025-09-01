@@ -4,7 +4,7 @@ const user = require("../models/User");
 const authMiddleware = async (req, res) => {
   const token = req.cookies.token;
 
-  console.log(req.ip);
+  console.log(req.ip, "ip");
 
   if (!token) {
     return res.status(401).json({
