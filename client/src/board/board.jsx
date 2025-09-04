@@ -1,75 +1,54 @@
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import { TaskManagerContext } from "../context/taskManager";
 import { callLogoutUser } from "../services";
 import Chat from "../socket/chat";
 
 function Board() {
-  const { board, player, setPlayer, win, tie, displayBtn, setDisplayBtn, handleBoardOnClick, playAgainButton, GameCheck, setWin } = useContext(TaskManagerContext);
 
-  // const [win, setWin] = useState(false);
-  // const [tie, setTie] = useState(false);
-  // const [displayBtn, setDisplayBtn] = useState(false);
+  const [gameOver, setGameOver] = useState(false);
 
-  // function handleBoardOnClick(event) {
-  //   const cell = event.target.classList[4];
-  //   // console.log(event.target);
-  //   // console.log(cell);
-  //   if (board[cell]) return; // prevent overriding a filled cell
+  const {
+    board,
+    player,
+    win,
+    setTie,
+    tie,
+    displayBtn,
+    setDisplayBtn,
+    handleBoardOnClick,
+    playAgainButton,
+    GameCheck,
+    setWin,
+    yourTurn,
+  } = useContext(TaskManagerContext);
 
-  //   const mark = player ? "O" : "X";
-  //   const updatedBoard = { ...board, [cell]: mark };
-
-  //   setBoard(updatedBoard); // triggers re-render with new state
-
-  //   if (!GameCheck(updatedBoard)) {
-  //     setPlayer(!player);
-  //   } else if (GameCheck(updatedBoard) === "win") {
-  //     setWin(!win);
-  //     setDisplayBtn(true);
-  //   } else {
-  //     setTie(!tie);
-  //     setDisplayBtn(true);
-  //   }
-  // }
-
-  // function playAgainButton() {
-  //   setBoard({
-  //     one: "",
-  //     two: "",
-  //     three: "",
-  //     four: "",
-  //     five: "",
-  //     six: "",
-  //     seven: "",
-  //     eight: "",
-  //     nine: "",
-  //   });
-
-  //   setDisplayBtn(false);
-  //   setWin(false);
-  //   setTie(false);
-  // }
+  console.log(player, "player");
+  console.log(yourTurn, "yourturn");
 
   useEffect(() => {
 
-    console.log(player, "player");
-
-    if (!GameCheck(board)) {
-      setPlayer(!player);
-    } else if (GameCheck(board) === "win") {
+    if (GameCheck(board) === "O" || GameCheck(board) === "X") {
+      setGameOver(true);
       setWin(!win);
       setDisplayBtn(true);
-    } else {
+    } else if (GameCheck(board) === "tie") {
       setTie(!tie);
       setDisplayBtn(true);
     }
-  }, [board])
+  }, [board]);
+
+  function displayYourTurn(){
+    if (yourTurn === undefined) return ""
+    else if (yourTurn === false) return "Opponent's Turn"
+    else return `Your turn: ${player}`;
+  }
 
   return (
     <>
       <button onClick={callLogoutUser} className="absolute top-5">
         LogOut
       </button>
+      <p className="absolute top-19 left-[46%]">{gameOver ? "Game Over" : displayYourTurn()}</p>
       <div
         onClick={
           !GameCheck(board) ? (event) => handleBoardOnClick(event) : null
@@ -103,18 +82,9 @@ function Board() {
         <div className="border-solid border-3 border-white place-content-center nine">
           {board.nine}
         </div>
-        {/* {
-        [one,two,three,four,five,six,seven,eight,nine].map((element, index) => (
-          <div
-            className={`border-solid border-3 border-white place-content-center ${element}`}
-            key={index}
-          >
-          </div>
-        ))
-      } */}
         {win ? (
           <p className="animation1 text-4xl mt-10 absolute translate-x-1/2 translate-y-1/2 top-[100%] right-1/2">
-            Player {player ? "O" : "X"} won!
+            Player {GameCheck(board) === "O" ? "O" : GameCheck(board) === "X" ? "X" : null} won!
           </p>
         ) : null}
         {tie ? (

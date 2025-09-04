@@ -39,22 +39,35 @@ function TaskManagerProvider({ children }) {
   const navigate = useNavigate();
 
   // Game constans
-  const [player, setPlayer] = useState(true);
+  const [player, setPlayer] = useState(false);
+  const [yourTurn, setYourTurn] = useState(undefined);
   const [user, setUser] = useState(null);
   const [win, setWin] = useState(false);
   const [tie, setTie] = useState(false);
   const [displayBtn, setDisplayBtn] = useState(false);
+  const [storedInfo, setStoredInfo] = useState(null);
+  const [storedCurrentSidsIndex, setStoredCurrentSidsIndex] = useState(null);
+  const [storedOtherSidsIndex, setStoredOtherSidsIndex] = useState(null);
 
   function handleBoardOnClick(event) {
     const cell = event.target.classList[4];
-    // console.log(event.target);
-    // console.log(cell);
-    if (board[cell]) return; // prevent overriding a filled cell
 
-    const mark = player ? "O" : "X";
-    const updatedBoard = { ...board, [cell]: mark };
+    if (!yourTurn || board[cell]) return; // prevent overriding a filled cell
 
-    socketRef.current.emit("player-move", updatedBoard);
+    
+    const updatedBoard = { ...board, [cell]: player };
+    
+    // console.log(storedInfo, "stored info");
+    // console.log(storedInfo[storedCurrentSidsIndex], "stored info at index");
+    // console.log(storedInfo[storedCurrentSidsIndex][1][1] = false, "changed array");
+    // console.log(storedCurrentSidsIndex, "current index");
+    // console.log(storedOtherSidsIndex, "other index");
+    // console.log(!storedInfo[storedCurrentSidsIndex][1][1], "current changed");
+    // console.log(!storedInfo[storedOtherSidsIndex][1][1], "other changed");
+    storedInfo[storedCurrentSidsIndex][1][1] = !storedInfo[storedCurrentSidsIndex][1][1]
+    storedInfo[storedOtherSidsIndex][1][1] = !storedInfo[storedOtherSidsIndex][1][1]
+    // console.log(storedInfo, "stored info after change");
+    socketRef.current.emit("player-move", [updatedBoard, storedInfo]);
   }
 
   function playAgainButton() {
@@ -92,14 +105,35 @@ function TaskManagerProvider({ children }) {
 
       // tic-tac-toe websocket logic
       socketRef.current.on("player-move", (boardFromBackend) => {
+        console.log(boardFromBackend);
         setBoard(boardFromBackend);
       });
+
+      socketRef.current.on("playerValues", (playerValues) => {
+        setStoredInfo(playerValues);
+        console.log(playerValues, "player");
+        let temporaryArray = [];
+        if(playerValues.length > 0){
+          playerValues.forEach(sid => {
+            if (sid[0] === socketRef.current.id) setPlayer(sid[1][0]);
+            temporaryArray.push(sid[0]);
+          })
+          let indexOfCurrentId = temporaryArray.findIndex(x => x === socketRef.current.id);
+          setStoredCurrentSidsIndex(indexOfCurrentId);
+          let otherIndex = temporaryArray.findIndex(x => x !== socketRef.current.id);
+          if(otherIndex !== -1){
+            setStoredOtherSidsIndex(otherIndex);
+            setYourTurn(playerValues[indexOfCurrentId][1][1]);
+          }
+        }
+      })
 
       socketRef.current.on("play-again", (playAgainObject) => {
         setBoard(playAgainObject[0]);
         setWin(playAgainObject[1]);
         setDisplayBtn(playAgainObject[1]);
         setTie(playAgainObject[1]);
+        setYourTurn(false);
       })
 
       return () => {
@@ -136,7 +170,6 @@ function TaskManagerProvider({ children }) {
         board,
         setBoard,
         player,
-        setPlayer,
         user,
         loading,
         setLoading,
@@ -155,6 +188,7 @@ function TaskManagerProvider({ children }) {
         displayBtn,
         setDisplayBtn,
         GameCheck,
+        yourTurn,
       }}
     >
       {children}

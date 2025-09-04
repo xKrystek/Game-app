@@ -6,6 +6,7 @@ const authRouter = require("./routes/auth-route");
 const { Server } = require("socket.io");
 const http = require("http");
 const room_join = require("./scripts/rooms.js");
+const assignPlayerValuesandEmit = require("./scripts/playerValues.js");
 
 const app = express();
 require("./database");
@@ -22,7 +23,10 @@ app.use(cookieParser());
 app.use(express.json());
 
 app.use((req, res, next) => {
-  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+  res.setHeader(
+    "Cache-Control",
+    "no-store, no-cache, must-revalidate, proxy-revalidate"
+  );
   res.setHeader("Pragma", "no-cache");
   res.setHeader("Expires", "0");
   next();
@@ -43,56 +47,91 @@ let RoomsIndex = 0;
 
 let fullChat = [];
 
+let gameState = {};
+
 
 // Connection
 
 const TIC_TAC_TOE = io.of("/tic-tac-toe");
 
 TIC_TAC_TOE.on("connection", (socket) => {
-
   // join room
   const roomToJoin = room_join(TIC_TAC_TOE.adapter.rooms, RoomsIndex);
-  
-  socket.join(`${roomToJoin}`);
-  
+
+  socket.join(roomToJoin);
+
+
   // Console logs
   console.log(TIC_TAC_TOE.adapter.rooms, "all rooms");
   console.log(TIC_TAC_TOE.adapter.rooms.size, "amount of rooms");
   console.log(TIC_TAC_TOE.adapter.rooms.get("room1")?.size, "size of room1");
   console.log(TIC_TAC_TOE.adapter.sids.size, "Number of sockets");
   console.log(socket.rooms, "rooms the socket is joined to");
-  
+
   // Board logic
-  // let Board = {
-  //   one: "",
-  //   two: "",
-  //   three: "",
-  //   four: "",
-  //   five: "",
-  //   six: "",
-  //   seven: "",
-  //   eight: "",
-  //   nine: "",
+
+  // if (TIC_TAC_TOE.adapter.rooms.get(roomToJoin).size === 2) {
+
+  //   gameState[roomToJoin] = new Map();
+
+  //   const Symbols = ["X", "O"];
+
+  //   const index = [Math.round(Math.random() * 1)];
+
+  //   const [pickRandomSymbol] = Symbols[index];
+
+  //   Symbols.splice(index, 1);
+
+  //   TIC_TAC_TOE.adapter.rooms.get(roomToJoin).forEach((sid) => {
+  //     if(socket.id === sid) gameState[roomToJoin].set(socket.id, [pickRandomSymbol, pickRandomSymbol === "O" ? true : false]);
+  //     else gameState[roomToJoin].set(sid, [Symbols[0], Symbols[0] === "O" ? true : false]);
+  //   });
+  //   console.log(gameState[roomToJoin], "plsss");
+  
+  //   TIC_TAC_TOE.to(roomToJoin).emit("playerValues", Array.from(gameState[roomToJoin].entries()));
   // }
+
+  assignPlayerValuesandEmit(TIC_TAC_TOE, gameState, roomToJoin, socket);
+
+
   socket.on("player-move", (board) => {
-    TIC_TAC_TOE.to(`${roomToJoin}`).emit("player-move", board);
-  })
+    // console.log(board[1], "whole");
+    // console.log(board[1][1], "whole second array");
+    // console.log(board[1][1][1], "bool value");
+    TIC_TAC_TOE.to(roomToJoin).emit("player-move", board[0]);
+    TIC_TAC_TOE.to(roomToJoin).emit("playerValues", board[1]);
+  });
 
   socket.on("play-again", (again) => {
-    TIC_TAC_TOE.to(`${roomToJoin}`).emit("play-again", again)
-  })
-  
+    TIC_TAC_TOE.to(roomToJoin).emit("play-again", again);
+    assignPlayerValuesandEmit(TIC_TAC_TOE, gameState, roomToJoin, socket);
+  });
+
   // On received event
   socket.on("send-message", (arrayOfMessages) => {
     fullChat.push(arrayOfMessages);
     console.log(arrayOfMessages, "messages");
-    TIC_TAC_TOE.to(`${roomToJoin}`).emit("send-message", fullChat);
+    TIC_TAC_TOE.to(roomToJoin).emit("send-message", fullChat);
   });
-  
+
   // Disconnected
   socket.on("disconnect", () => {
     fullChat = [];
-    TIC_TAC_TOE.to(`${roomToJoin}`).emit("send-message", fullChat);
+    TIC_TAC_TOE.to(roomToJoin).emit("send-message", fullChat);
+    TIC_TAC_TOE.to(roomToJoin).emit("play-again", [
+      {
+        one: "",
+        two: "",
+        three: "",
+        four: "",
+        five: "",
+        six: "",
+        seven: "",
+        eight: "",
+        nine: "",
+      },
+      false,
+    ]);
     console.log("disconnected");
     console.log(TIC_TAC_TOE.adapter.rooms, "all rooms");
     console.log(TIC_TAC_TOE.adapter.rooms.size, "amount of rooms");
