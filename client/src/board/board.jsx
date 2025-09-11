@@ -5,7 +5,6 @@ import Chat from "../socket/chat";
 
 function Board() {
 
-  const [gameOver, setGameOver] = useState(false);
 
   const {
     board,
@@ -20,10 +19,13 @@ function Board() {
     GameCheck,
     setWin,
     yourTurn,
+    setYourTurn,
+    gameOver,
+    setGameOver
   } = useContext(TaskManagerContext);
 
-  console.log(player, "player");
-  console.log(yourTurn, "yourturn");
+  // console.log(player, "player");
+  // console.log(yourTurn, "yourturn");
 
   useEffect(() => {
 
@@ -32,6 +34,7 @@ function Board() {
       setWin(!win);
       setDisplayBtn(true);
     } else if (GameCheck(board) === "tie") {
+      setYourTurn(undefined);
       setTie(!tie);
       setDisplayBtn(true);
     }

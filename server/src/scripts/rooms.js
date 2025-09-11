@@ -5,29 +5,33 @@ function room_join(rooms, roomsIndex){
     const ROOMS_NAMES = [];
 
     for(const keys of rooms.keys()){
-        console.log(keys);
+        // console.log(keys, "listed rooms");
         ROOMS_NAMES.push(keys);
     }
 
-    const filtered = ROOMS_NAMES.filter((x) => x.length < 11);
+    const filtered = ROOMS_NAMES.filter((x) => x.match(/^room/));
 
-    console.log(filtered, "filtered");
+    // console.log(filtered, "filtered");
 
-    if(filtered.length > 0){
+    const result = filtered.filter(x => {
+        if(rooms.get(x).size < 2) return x;
+    })
+    // console.log(result, "result")
 
-        const result = filtered.map(x => {
-            if(rooms.get(x).size < 2) return x;
-        })
-        if(result.length > 1){
-            result.sort(collator.compare);
-            result.splice(1);
-            return `${result}`;
-        }
-        console.log(result, "answer");
-        return `${result}`;
+    if(filtered.length > 0 && result.length !== 0){
+
+            // sorting is used so that the user joins possible lowest numbered existing room
+            // const sorted = result.sort(collator.compare);
+            // console.log(sorted, "sorted");
+            // const spliced = result.splice(0, 1);
+            // console.log(spliced, "spliced");
+            // console.log("triggered")
+            // console.log(result, "spliced result")
+            return `${result[0]}`;
     } 
 
-    return `room${++roomsIndex}`;
+    // console.log("reached");
+    return `room${++roomsIndex.roomNumber}`;
 }
 
 // const roomsSubsitute = new Map([

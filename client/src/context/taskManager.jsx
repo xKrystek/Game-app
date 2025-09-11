@@ -38,6 +38,7 @@ function TaskManagerProvider({ children }) {
   const location = useLocation();
   const navigate = useNavigate();
 
+  
   // Game constans
   const [player, setPlayer] = useState(false);
   const [yourTurn, setYourTurn] = useState(undefined);
@@ -48,15 +49,17 @@ function TaskManagerProvider({ children }) {
   const [storedInfo, setStoredInfo] = useState(null);
   const [storedCurrentSidsIndex, setStoredCurrentSidsIndex] = useState(null);
   const [storedOtherSidsIndex, setStoredOtherSidsIndex] = useState(null);
+  const [gameOver, setGameOver] = useState(false);
+  const username = useRef(null);
+  const [listOfUsernames, setListOfUsernames] = useState([]);
 
   function handleBoardOnClick(event) {
     const cell = event.target.classList[4];
 
     if (!yourTurn || board[cell]) return; // prevent overriding a filled cell
 
-    
     const updatedBoard = { ...board, [cell]: player };
-    
+
     // console.log(storedInfo, "stored info");
     // console.log(storedInfo[storedCurrentSidsIndex], "stored info at index");
     // console.log(storedInfo[storedCurrentSidsIndex][1][1] = false, "changed array");
@@ -64,25 +67,29 @@ function TaskManagerProvider({ children }) {
     // console.log(storedOtherSidsIndex, "other index");
     // console.log(!storedInfo[storedCurrentSidsIndex][1][1], "current changed");
     // console.log(!storedInfo[storedOtherSidsIndex][1][1], "other changed");
-    storedInfo[storedCurrentSidsIndex][1][1] = !storedInfo[storedCurrentSidsIndex][1][1]
-    storedInfo[storedOtherSidsIndex][1][1] = !storedInfo[storedOtherSidsIndex][1][1]
+    storedInfo[storedCurrentSidsIndex][1][1] =
+      !storedInfo[storedCurrentSidsIndex][1][1];
+    storedInfo[storedOtherSidsIndex][1][1] =
+      !storedInfo[storedOtherSidsIndex][1][1];
     // console.log(storedInfo, "stored info after change");
     socketRef.current.emit("player-move", [updatedBoard, storedInfo]);
   }
 
   function playAgainButton() {
-
-    socketRef.current.emit("play-again", [{
-      one: "",
-      two: "",
-      three: "",
-      four: "",
-      five: "",
-      six: "",
-      seven: "",
-      eight: "",
-      nine: "",
-    }, false]);
+    socketRef.current.emit("play-again", [
+      {
+        one: "",
+        two: "",
+        three: "",
+        four: "",
+        five: "",
+        six: "",
+        seven: "",
+        eight: "",
+        nine: "",
+      },
+      false,
+    ]);
   }
 
   // Websocket constans
@@ -90,7 +97,8 @@ function TaskManagerProvider({ children }) {
   const [chat, setChat] = useState([]);
 
   useEffect(() => {
-    // Websocket games logic
+    // Websocket game's logic
+    if(localStorage.length > 0) username.current = localStorage.getItem("username");
 
     if (location.pathname === "/tic-tac-toe") {
       socketRef.current = io("http://localhost:5000/tic-tac-toe");
@@ -101,6 +109,7 @@ function TaskManagerProvider({ children }) {
 
       socketRef.current.on("connect", () => {
         console.log(socketRef.current.id, "socket id");
+        socketRef.current.emit("userName", [username.current, socketRef.current.id]);
       });
 
       // tic-tac-toe websocket logic
@@ -111,59 +120,83 @@ function TaskManagerProvider({ children }) {
 
       socketRef.current.on("playerValues", (playerValues) => {
         setStoredInfo(playerValues);
-        console.log(playerValues, "player");
+        console.log(playerValues, "player Values");
         let temporaryArray = [];
-        if(playerValues.length > 0){
-          playerValues.forEach(sid => {
+        if (playerValues.length > 0) {
+          playerValues.forEach((sid) => {
             if (sid[0] === socketRef.current.id) setPlayer(sid[1][0]);
             temporaryArray.push(sid[0]);
-          })
-          let indexOfCurrentId = temporaryArray.findIndex(x => x === socketRef.current.id);
+          });
+          let indexOfCurrentId = temporaryArray.findIndex(
+            (x) => x === socketRef.current.id
+          );
           setStoredCurrentSidsIndex(indexOfCurrentId);
-          let otherIndex = temporaryArray.findIndex(x => x !== socketRef.current.id);
-          if(otherIndex !== -1){
+          let otherIndex = temporaryArray.findIndex(
+            (x) => x !== socketRef.current.id
+          );
+          if (otherIndex !== -1) {
             setStoredOtherSidsIndex(otherIndex);
             setYourTurn(playerValues[indexOfCurrentId][1][1]);
           }
         }
-      })
+      });
 
       socketRef.current.on("play-again", (playAgainObject) => {
         setBoard(playAgainObject[0]);
         setWin(playAgainObject[1]);
         setDisplayBtn(playAgainObject[1]);
         setTie(playAgainObject[1]);
-        setYourTurn(false);
-      })
+        setGameOver(playAgainObject[1]);
+      });
 
-      return () => {
-        socketRef.current?.disconnect();
-      };
+      socketRef.current.on("playerDisconnect", () => {
+        setYourTurn(undefined);
+      });
     }
 
-    // Verification User logic
-    const verifyCookie = async () => {
-      const response = await callUserAuthApi();
-
-      console.log("called");
-      console.log(location.pathname);
-
-      if (response?.userCredentials) setUser(response?.userCredentials);
-
-      console.log(response, "true hunting");
-
-      return response?.success
+      
+      // Verification User logic
+      const verifyCookie = async () => {
+        const response = await callUserAuthApi();
+        
+        // console.log("called");
+        console.log(location.pathname);
+        
+        if (response?.userCredentials){
+          setUser(response?.userCredentials);
+          localStorage.setItem("username", response?.userCredentials.username);
+        } 
+        
+        // console.log(response, "true hunting");
+        
+        return response?.success
         ? navigate(
-            location.pathname === "/" || location.pathname === "/auth"
-              ? "/games"
-              : `${location.pathname}`,
-            { replace: true }
-          )
+          location.pathname === "/" || location.pathname === "/auth"
+          ? "/games"
+          : `${location.pathname}`,
+          { replace: true }
+        )
         : navigate("/auth", { replace: true });
-    };
-    verifyCookie();
-  }, [location.pathname]);
+      };
 
+      verifyCookie();
+
+      return () => {
+        setBoard({
+          one: "",
+          two: "",
+          three: "",
+          four: "",
+          five: "",
+          six: "",
+          seven: "",
+          eight: "",
+          nine: "",
+        });
+        socketRef.current?.disconnect();
+      };
+    }, [location.pathname]);
+    
   return (
     <TaskManagerContext.Provider
       value={{
@@ -189,6 +222,9 @@ function TaskManagerProvider({ children }) {
         setDisplayBtn,
         GameCheck,
         yourTurn,
+        setYourTurn,
+        gameOver,
+        setGameOver,
       }}
     >
       {children}

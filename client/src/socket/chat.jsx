@@ -2,14 +2,17 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import { TaskManagerContext } from "../context/taskManager";
 
 function Chat() {
-  const { socketRef, chat, setChat } = useContext(TaskManagerContext);
+  const { socketRef, chat, setChat, user } = useContext(TaskManagerContext);
   const [inputDisplay, setInputDisplay] = useState("");
   const [message, setMessage] = useState({ sender: null, message: null });
   const messagesEndRef = useRef(null);
+  const inputRef = useRef(null);
+  const specialKey = useRef(0);
+  const secondSpecialKey = useRef(1000);
 
   useEffect(() => {
     return () => setChat([]);
-  }, [])
+  }, []);
 
   // Emit new message
   useEffect(() => {
@@ -34,15 +37,25 @@ function Chat() {
       {/* Messages */}
       <div className="flex-1 flex flex-col overflow-y-auto p-2 space-y-2">
         {chat.map((msg, index) => (
-          <div
-            key={index}
-            className={`${
-              msg.sender === socketRef.current?.id
-                ? "self-end bg-blue-500 text-white"
-                : "self-start bg-gray-200 text-black"
-            } max-w-[75%] break-words whitespace-pre-line p-2 rounded-2xl`}
-          >
-            {msg.message}
+          <div key={++secondSpecialKey.current} className="w-full flex flex-col">
+            <span
+              key={++specialKey.current}
+              className={`${
+                msg.sender === socketRef.current?.id ? "self-end mt-5 text-shadow-white text-[10px]" : "self-start text-white text-[10px]"
+              }`}
+            >
+              {user.username}
+            </span>
+            <div
+              key={index}
+              className={`${
+                msg.sender === socketRef.current?.id
+                  ? "self-end bg-blue-500 text-white"
+                  : "self-start bg-gray-200 text-black"
+              } w-fit max-w-[75%] break-words whitespace-pre-line p-2 rounded-2xl`}
+            >
+              {msg.message}
+            </div>
           </div>
         ))}
         <div ref={messagesEndRef} />
@@ -54,8 +67,12 @@ function Chat() {
           type="text"
           value={inputDisplay}
           onChange={(e) => setInputDisplay(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") sendMessage();
+          }}
           placeholder="Enter the message"
           className="border-2 p-1 flex-1 rounded"
+          ref={inputRef}
         />
         <button
           onClick={sendMessage}
