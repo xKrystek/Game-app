@@ -10,6 +10,9 @@ const assignPlayerValuesandEmit = require("./scripts/playerValues.js");
 
 const app = express();
 require("./database");
+const user = require("./models/User.js");
+
+// user.find({username: "kupa"}).then(x => console.log(x));
 
 app.use(
   cors({
@@ -22,7 +25,7 @@ app.use(
 app.use(cookieParser());
 app.use(express.json());
 
-app.use((req, res, next) => {
+app.use((_, res, next) => {
   res.setHeader(
     "Cache-Control",
     "no-store, no-cache, must-revalidate, proxy-revalidate"
@@ -43,12 +46,11 @@ const io = new Server(httpserver, {
   },
 });
 
-const RoomsIndex = {roomNumber:  0};
+const RoomsIndex = { roomNumber: 0 };
 
-let fullChat = [];
+let fullChat = {};
 
 let gameState = {};
-
 
 // Connection
 
@@ -60,16 +62,8 @@ TIC_TAC_TOE.on("connection", (socket) => {
 
   socket.join(roomToJoin);
 
-  //   if(!gameState[`${roomToJoin}-Usernames`]){
-  //     gameState[`${roomToJoin}-Usernames`] = [];
-  //     console.log("created");
-  //     } 
+  if(!fullChat[roomToJoin]) fullChat[roomToJoin] = [];
 
-  // // unfinished user emit and display properly in chat depending on the room
-  // socket.on("userName", (username) => {
-  //   gameState[`${roomToJoin}-Usernames`].push(username);
-  //   console.log(roomToJoin ,gameState[`${roomToJoin}-Usernames`] ,"usernames pushed");
-  // });
 
   // Console logs
   console.log(TIC_TAC_TOE.adapter.rooms, "all rooms");
@@ -82,11 +76,7 @@ TIC_TAC_TOE.on("connection", (socket) => {
 
   assignPlayerValuesandEmit(TIC_TAC_TOE, gameState, roomToJoin, socket);
 
-
   socket.on("player-move", (board) => {
-    // console.log(board[1], "whole");
-    // console.log(board[1][1], "whole second array");
-    // console.log(board[1][1][1], "bool value");
     TIC_TAC_TOE.to(roomToJoin).emit("player-move", board[0]);
     TIC_TAC_TOE.to(roomToJoin).emit("playerValues", board[1]);
   });
@@ -98,15 +88,18 @@ TIC_TAC_TOE.on("connection", (socket) => {
 
   // On received event
   socket.on("send-message", (arrayOfMessages) => {
-    fullChat.push(arrayOfMessages);
+    fullChat[roomToJoin].push(arrayOfMessages);
     console.log(arrayOfMessages, "messages");
-    TIC_TAC_TOE.to(roomToJoin).emit("send-message", fullChat);
+    console.log(roomToJoin);
+    TIC_TAC_TOE.to(roomToJoin).emit("send-message", fullChat[roomToJoin]);
   });
 
   // Disconnected
   socket.on("disconnect", () => {
-    fullChat = [];
-    TIC_TAC_TOE.to(roomToJoin).emit("send-message", fullChat);
+    if(!TIC_TAC_TOE.adapter.rooms.get(roomToJoin)) {
+     delete fullChat[roomToJoin];
+     delete gameState[roomToJoin];
+    } else TIC_TAC_TOE.to(roomToJoin).emit("send-message", fullChat[roomToJoin] = [])
     TIC_TAC_TOE.to(roomToJoin).emit("play-again", [
       {
         one: "",

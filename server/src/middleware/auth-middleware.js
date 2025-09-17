@@ -15,7 +15,10 @@ const authMiddleware = async (req, res) => {
 
   try {
     const decoded = jwt.verify(token, "DEFAULT_SECRET_KEY");
+    console.log(" ");
     const userCredentials = await user.findById(decoded.getId);
+    console.log(decoded, "decoded");
+    console.log(" ");
 
     if (userCredentials) {
       return res.status(200).json({

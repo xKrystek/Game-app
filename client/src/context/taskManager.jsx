@@ -50,8 +50,7 @@ function TaskManagerProvider({ children }) {
   const [storedCurrentSidsIndex, setStoredCurrentSidsIndex] = useState(null);
   const [storedOtherSidsIndex, setStoredOtherSidsIndex] = useState(null);
   const [gameOver, setGameOver] = useState(false);
-  const username = useRef(null);
-  const [listOfUsernames, setListOfUsernames] = useState([]);
+  const [enableChat, setEnableChat] = useState(true);
 
   function handleBoardOnClick(event) {
     const cell = event.target.classList[4];
@@ -60,18 +59,10 @@ function TaskManagerProvider({ children }) {
 
     const updatedBoard = { ...board, [cell]: player };
 
-    // console.log(storedInfo, "stored info");
-    // console.log(storedInfo[storedCurrentSidsIndex], "stored info at index");
-    // console.log(storedInfo[storedCurrentSidsIndex][1][1] = false, "changed array");
-    // console.log(storedCurrentSidsIndex, "current index");
-    // console.log(storedOtherSidsIndex, "other index");
-    // console.log(!storedInfo[storedCurrentSidsIndex][1][1], "current changed");
-    // console.log(!storedInfo[storedOtherSidsIndex][1][1], "other changed");
     storedInfo[storedCurrentSidsIndex][1][1] =
       !storedInfo[storedCurrentSidsIndex][1][1];
     storedInfo[storedOtherSidsIndex][1][1] =
       !storedInfo[storedOtherSidsIndex][1][1];
-    // console.log(storedInfo, "stored info after change");
     socketRef.current.emit("player-move", [updatedBoard, storedInfo]);
   }
 
@@ -98,8 +89,9 @@ function TaskManagerProvider({ children }) {
 
   useEffect(() => {
     // Websocket game's logic
-    if(localStorage.length > 0) username.current = localStorage.getItem("username");
 
+    console.log(location.pathname, "location pathname");
+    
     if (location.pathname === "/tic-tac-toe") {
       socketRef.current = io("http://localhost:5000/tic-tac-toe");
       // Connect to socket
@@ -109,7 +101,6 @@ function TaskManagerProvider({ children }) {
 
       socketRef.current.on("connect", () => {
         console.log(socketRef.current.id, "socket id");
-        socketRef.current.emit("userName", [username.current, socketRef.current.id]);
       });
 
       // tic-tac-toe websocket logic
@@ -123,6 +114,7 @@ function TaskManagerProvider({ children }) {
         console.log(playerValues, "player Values");
         let temporaryArray = [];
         if (playerValues.length > 0) {
+          setEnableChat(false);
           playerValues.forEach((sid) => {
             if (sid[0] === socketRef.current.id) setPlayer(sid[1][0]);
             temporaryArray.push(sid[0]);
@@ -148,84 +140,85 @@ function TaskManagerProvider({ children }) {
         setTie(playAgainObject[1]);
         setGameOver(playAgainObject[1]);
       });
-
+      
       socketRef.current.on("playerDisconnect", () => {
         setYourTurn(undefined);
+        setEnableChat(false);
       });
+
     }
-
-      
-      // Verification User logic
-      const verifyCookie = async () => {
-        const response = await callUserAuthApi();
-        
-        // console.log("called");
-        console.log(location.pathname);
-        
-        if (response?.userCredentials){
-          setUser(response?.userCredentials);
-          localStorage.setItem("username", response?.userCredentials.username);
-        } 
-        
-        // console.log(response, "true hunting");
-        
-        return response?.success
-        ? navigate(
-          location.pathname === "/" || location.pathname === "/auth"
-          ? "/games"
-          : `${location.pathname}`,
-          { replace: true }
-        )
-        : navigate("/auth", { replace: true });
-      };
-
-      verifyCookie();
-
-      return () => {
-        setBoard({
-          one: "",
-          two: "",
-          three: "",
-          four: "",
-          five: "",
-          six: "",
-          seven: "",
-          eight: "",
-          nine: "",
-        });
-        socketRef.current?.disconnect();
-      };
-    }, [location.pathname]);
     
+    
+    // Verification User logic
+    const verifyCookie = async () => {
+      
+      const response = await callUserAuthApi();
+      
+      
+      if (response?.userCredentials){
+        setUser(response?.userCredentials.username);
+      } 
+      
+      return response?.success
+      ? navigate(
+        location.pathname === "/" || location.pathname === "/auth"
+        ? "/games"
+        : `${location.pathname}`
+      )
+      : navigate("/auth");
+    };
+    
+    if(!user) verifyCookie();
+    
+    return () => {
+      setBoard({
+        one: "",
+        two: "",
+        three: "",
+        four: "",
+        five: "",
+        six: "",
+        seven: "",
+        eight: "",
+        nine: "",
+      });
+      console.log("resolved");
+      socketRef.current?.disconnect();
+      socketRef.current = null;
+    };
+  }, [location.pathname]);
+  
   return (
     <TaskManagerContext.Provider
-      value={{
-        board,
-        setBoard,
-        player,
-        user,
-        loading,
-        setLoading,
-        LoggingView,
-        setLoggingView,
-        location,
-        socketRef,
-        chat,
-        setChat,
-        playAgainButton,
-        handleBoardOnClick,
-        win,
-        setWin,
-        tie,
-        setTie,
-        displayBtn,
-        setDisplayBtn,
-        GameCheck,
-        yourTurn,
-        setYourTurn,
-        gameOver,
-        setGameOver,
-      }}
+    value={{
+      board,
+      setBoard,
+      player,
+      user,
+      loading,
+      setLoading,
+      LoggingView,
+      setLoggingView,
+      location,
+      socketRef,
+      chat,
+      setChat,
+      playAgainButton,
+      handleBoardOnClick,
+      win,
+      setWin,
+      tie,
+      setTie,
+      displayBtn,
+      setDisplayBtn,
+      GameCheck,
+      yourTurn,
+      setYourTurn,
+      gameOver,
+      setGameOver,
+      enableChat,
+      navigate
+    }}
     >
       {children}
     </TaskManagerContext.Provider>

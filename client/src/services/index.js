@@ -71,6 +71,7 @@ export const callLogoutUser = async () => {
       withCredentials: true,
     });
     console.log("logged Out");
+    console.log(response, "from callLogoutUser");
     return response?.data;
   }  catch (e){
     console.log(e);

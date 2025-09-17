@@ -1,11 +1,9 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { TaskManagerContext } from "../context/taskManager";
 import { callLogoutUser } from "../services";
 import Chat from "../socket/chat";
 
 function Board() {
-
-
   const {
     board,
     player,
@@ -21,14 +19,12 @@ function Board() {
     yourTurn,
     setYourTurn,
     gameOver,
-    setGameOver
+    setGameOver,
   } = useContext(TaskManagerContext);
 
-  // console.log(player, "player");
-  // console.log(yourTurn, "yourturn");
+  const width = useRef(null);
 
   useEffect(() => {
-
     if (GameCheck(board) === "O" || GameCheck(board) === "X") {
       setGameOver(true);
       setWin(!win);
@@ -40,72 +36,82 @@ function Board() {
     }
   }, [board]);
 
-  function displayYourTurn(){
-    if (yourTurn === undefined) return ""
-    else if (yourTurn === false) return "Opponent's Turn"
+  function displayYourTurn() {
+    if (yourTurn === undefined) return "";
+    else if (yourTurn === false) return "Opponent's Turn";
     else return `Your turn: ${player}`;
   }
 
   return (
-    <>
-      <button onClick={callLogoutUser} className="absolute top-5">
+    <div className="flex w-full h-full">
+      <p className="fixed top-[10%] left-[49%] translate-x-[-50%] translate-y-[-50%]">
+        {gameOver ? "Game Over" : displayYourTurn()}
+      </p>
+      <div className="flex justify-center items-center h-full w-full">
+        <div
+          onClick={
+            !GameCheck(board) ? (event) => handleBoardOnClick(event) : null
+          }
+          className="text-8xl text-center grid grid-cols-3 grid-rows-3 gap-3 w-full lg:w-3/4 xl:w-1/2 aspect-square self-center relative"
+        >
+      <button onClick={callLogoutUser} className="fixed top-0 left-0 text-[2rem] 2xl:text-[1.5vw] xl:text-[2vw] m-2">
         LogOut
       </button>
-      <p className="absolute top-19 left-[46%]">{gameOver ? "Game Over" : displayYourTurn()}</p>
-      <div
-        onClick={
-          !GameCheck(board) ? (event) => handleBoardOnClick(event) : null
-        }
-        className="text-8xl text-center grid grid-cols-3 grid-rows-3 gap-3 w-[611px] h-[611px] relative bottom-12"
-      >
-        <div className="border-solid border-3 border-white place-content-center one">
-          {board.one}
+          <div className="border-solid border-3 border-white place-content-center one">
+            {board.one}
+          </div>
+          <div className="border-solid border-3 border-white place-content-center two">
+            {board.two}
+          </div>
+          <div className="border-solid border-3 border-white place-content-center three">
+            {board.three}
+          </div>
+          <div className="border-solid border-3 border-white place-content-center four">
+            {board.four}
+          </div>
+          <div className="border-solid border-3 border-white place-content-center five">
+            {board.five}
+          </div>
+          <div className="border-solid border-3 border-white place-content-center six">
+            {board.six}
+          </div>
+          <div className="border-solid border-3 border-white place-content-center seven">
+            {board.seven}
+          </div>
+          <div className="border-solid border-3 border-white place-content-center eight">
+            {board.eight}
+          </div>
+          <div className="border-solid border-3 border-white place-content-center nine">
+            {board.nine}
+          </div>
+          {win ? (
+            <p className="animation1 text-[2rem] 2xl:text-[1.5vw] xl:text-[2vw] translate-x-1/2 translate-y-1/2 top-[15%] right-[51%] fixed">
+              Player{" "}
+              {GameCheck(board) === "O"
+                ? "O"
+                : GameCheck(board) === "X"
+                ? "X"
+                : null}{" "}
+              won!
+            </p>
+          ) : null}
+          {tie ? (
+            <p className="animation1 text-[2rem] 2xl:text-[1.5vw] xl:text-[2vw] translate-x-1/2 translate-y-1/2 top-[15%] right-[51%] fixed">
+              TIE !!
+            </p>
+          ) : null}
         </div>
-        <div className="border-solid border-3 border-white place-content-center two">
-          {board.two}
-        </div>
-        <div className="border-solid border-3 border-white place-content-center three">
-          {board.three}
-        </div>
-        <div className="border-solid border-3 border-white place-content-center four">
-          {board.four}
-        </div>
-        <div className="border-solid border-3 border-white place-content-center five">
-          {board.five}
-        </div>
-        <div className="border-solid border-3 border-white place-content-center six">
-          {board.six}
-        </div>
-        <div className="border-solid border-3 border-white place-content-center seven">
-          {board.seven}
-        </div>
-        <div className="border-solid border-3 border-white place-content-center eight">
-          {board.eight}
-        </div>
-        <div className="border-solid border-3 border-white place-content-center nine">
-          {board.nine}
-        </div>
-        {win ? (
-          <p className="animation1 text-4xl mt-10 absolute translate-x-1/2 translate-y-1/2 top-[100%] right-1/2">
-            Player {GameCheck(board) === "O" ? "O" : GameCheck(board) === "X" ? "X" : null} won!
-          </p>
-        ) : null}
-        {tie ? (
-          <p className="animation1 text-4xl mt-10 absolute translate-x-1/2 translate-y-1/2 top-[100%] right-1/2">
-            TIE !!
-          </p>
-        ) : null}
       </div>
       {displayBtn ? (
         <button
           onClick={playAgainButton}
-          className="animation2 text-4xl mt-25 cursor-pointer text-nowrap absolute left-1/2 translate-x-[-50%] "
+          className="animation2 text-[2rem] 2xl:text-[1.5vw] xl:text-[2vw] cursor-pointer text-nowrap left-[49%] translate-x-[-50%] fixed bottom-1/12"
         >
           Play Again
         </button>
       ) : null}
       <Chat />
-    </>
+    </div>
   );
 }
 
