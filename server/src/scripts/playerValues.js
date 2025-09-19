@@ -7,7 +7,7 @@ function assignPlayerValuesandEmit(TIC_TAC_TOE, gameState, roomToJoin, socket) {
 
     const index = [Math.round(Math.random() * 1)];
 
-    const [pickRandomSymbol] = Symbols[index];
+    const pickRandomSymbol = Symbols[index];
 
     Symbols.splice(index, 1);
 

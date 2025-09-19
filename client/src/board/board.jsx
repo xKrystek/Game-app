@@ -1,7 +1,8 @@
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef } from "react";
 import { TaskManagerContext } from "../context/taskManager";
 import { callLogoutUser } from "../services";
-import Chat from "../socket/chat";
+import Chat from "../chat/chat";
+import Scoreboard from "../scoreboard/scoreboard";
 
 function Board() {
   const {
@@ -20,9 +21,8 @@ function Board() {
     setYourTurn,
     gameOver,
     setGameOver,
+    setUser,
   } = useContext(TaskManagerContext);
-
-  const width = useRef(null);
 
   useEffect(() => {
     if (GameCheck(board) === "O" || GameCheck(board) === "X") {
@@ -43,20 +43,24 @@ function Board() {
   }
 
   return (
-    <div className="flex w-full h-full">
+    <div className="flex w-full h-full justify-center items-center">
+      <Scoreboard />
       <p className="fixed top-[10%] left-[49%] translate-x-[-50%] translate-y-[-50%]">
         {gameOver ? "Game Over" : displayYourTurn()}
       </p>
-      <div className="flex justify-center items-center h-full w-full">
+      <div className="flex justify-center items-center h-1/2 w-1/2">
         <div
           onClick={
             !GameCheck(board) ? (event) => handleBoardOnClick(event) : null
           }
-          className="text-8xl text-center grid grid-cols-3 grid-rows-3 gap-3 w-full lg:w-3/4 xl:w-1/2 aspect-square self-center relative"
+          className="text-8xl text-center grid grid-cols-3 grid-rows-3 2xl:gap-3 gap-1 sm:gap-2 w-4/5 lg:w-3/4 xl:w-3/5 aspect-square self-center relative"
         >
-      <button onClick={callLogoutUser} className="fixed top-0 left-0 text-[2rem] 2xl:text-[1.5vw] xl:text-[2vw] m-2">
-        LogOut
-      </button>
+          <button
+            onClick={callLogoutUser}
+            className="fixed top-0 left-0 text-[2rem] 2xl:text-[1.5vw] xl:text-[2vw] m-2"
+          >
+            LogOut
+          </button>
           <div className="border-solid border-3 border-white place-content-center one">
             {board.one}
           </div>
@@ -86,13 +90,7 @@ function Board() {
           </div>
           {win ? (
             <p className="animation1 text-[2rem] 2xl:text-[1.5vw] xl:text-[2vw] translate-x-1/2 translate-y-1/2 top-[15%] right-[51%] fixed">
-              Player{" "}
-              {GameCheck(board) === "O"
-                ? "O"
-                : GameCheck(board) === "X"
-                ? "X"
-                : null}{" "}
-              won!
+              {GameCheck(board) === player ? "You won" : "You lost"}
             </p>
           ) : null}
           {tie ? (
@@ -103,12 +101,14 @@ function Board() {
         </div>
       </div>
       {displayBtn ? (
-        <button
-          onClick={playAgainButton}
-          className="animation2 text-[2rem] 2xl:text-[1.5vw] xl:text-[2vw] cursor-pointer text-nowrap left-[49%] translate-x-[-50%] fixed bottom-1/12"
-        >
-          Play Again
-        </button>
+        <>
+          <button
+            onClick={playAgainButton}
+            className="animation2 text-[2rem] 2xl:text-[1.5vw] xl:text-[2vw] cursor-pointer text-nowrap left-[49%] translate-x-[-50%] fixed bottom-1/12"
+          >
+            Play Again
+          </button>
+        </>
       ) : null}
       <Chat />
     </div>

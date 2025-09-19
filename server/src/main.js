@@ -52,6 +52,8 @@ let fullChat = {};
 
 let gameState = {};
 
+let usernamesList = {};
+
 // Connection
 
 const TIC_TAC_TOE = io.of("/tic-tac-toe");
@@ -63,6 +65,8 @@ TIC_TAC_TOE.on("connection", (socket) => {
   socket.join(roomToJoin);
 
   if(!fullChat[roomToJoin]) fullChat[roomToJoin] = [];
+
+  if(!usernamesList[roomToJoin]) usernamesList[roomToJoin] = [];
 
 
   // Console logs
@@ -85,6 +89,19 @@ TIC_TAC_TOE.on("connection", (socket) => {
     TIC_TAC_TOE.to(roomToJoin).emit("play-again", again);
     assignPlayerValuesandEmit(TIC_TAC_TOE, gameState, roomToJoin, socket);
   });
+
+  // Scoreboard
+
+  socket.on("listOfUsernames", (listOfUsernames) => {
+    console.log(listOfUsernames, "listaa")
+    if(usernamesList[roomToJoin].length < 2) usernamesList[roomToJoin].push(listOfUsernames);
+    else usernamesList[roomToJoin].map(x => {
+      console.log(x, "console.log");
+      if(x[0] === listOfUsernames[0]) return x[1] = listOfUsernames[1];
+    })
+    console.log(usernamesList[roomToJoin], "lista duzaa");
+    TIC_TAC_TOE.to(roomToJoin).emit("listOfUsernames", usernamesList[roomToJoin])
+  })
 
   // On received event
   socket.on("send-message", (arrayOfMessages) => {
