@@ -45,13 +45,29 @@ function TaskManagerProvider({ children }) {
   const [win, setWin] = useState(false);
   const [tie, setTie] = useState(false);
   const [displayBtn, setDisplayBtn] = useState(false);
+
   const [storedInfo, setStoredInfo] = useState(null);
   const [storedCurrentSidsIndex, setStoredCurrentSidsIndex] = useState(null);
   const [storedOtherSidsIndex, setStoredOtherSidsIndex] = useState(null);
+
   const [gameOver, setGameOver] = useState(false);
-  const [enableChat, setEnableChat] = useState(true);
-  const [rematch, setRematch] = useState(undefined);
-  const [usersList, setUsersList] = useState([]);
+
+  // Chat constans
+  const [disableChat, setDisableChat] = useState(true);
+
+  //Scoreboard constans
+  const [yourScore, setYourScore] = useState(0);
+  const [oponentScore, setOponentScore] = useState(0);
+  const [playersUsernamesList, setPlayersUsernamesList] = useState([]);
+  const [displayScoreBoard, setDisplayScoreBoard] = useState(false);
+  const [rematch, setRematch] = useState(false);
+  const [rematchYou, setRematchYou] = useState(false);
+  const [rematchOponent, setRematchOponent] = useState(false);
+
+  // Websocket constans
+  const socketRef = useRef(null);
+  const [chat, setChat] = useState([]);
+  const [socketId, setSocketId] = useState(null);
 
   function handleBoardOnClick(event) {
     const cell = event.target.classList[4];
@@ -64,30 +80,27 @@ function TaskManagerProvider({ children }) {
       !storedInfo[storedCurrentSidsIndex][1][1];
     storedInfo[storedOtherSidsIndex][1][1] =
       !storedInfo[storedOtherSidsIndex][1][1];
-    socketRef.current.emit("player-move", [updatedBoard, storedInfo]);
+    socketRef.current.emit("player-move", updatedBoard, storedInfo);
   }
 
   function playAgainButton() {
-    socketRef.current.emit("play-again", [
-      {
-        one: "",
-        two: "",
-        three: "",
-        four: "",
-        five: "",
-        six: "",
-        seven: "",
-        eight: "",
-        nine: "",
-      },
-      false,
-    ]);
+    socketRef.current.emit("play-again");
+
+    setDisplayBtn(false);
+
+    socketRef.current.emit("rematch", [socketId, true]);
   }
 
-  // Websocket constans
-  const socketRef = useRef(null);
-  const [chat, setChat] = useState([]);
-  const [socketId, setSocketId] = useState(null);
+  useEffect(() => {
+
+    let secondPlayer;
+    playersUsernamesList.forEach(user => user[1] !== socketId ? secondPlayer = user[1] : null);
+
+    if(GameCheck(board) && player && GameCheck(board) === player) socketRef.current.emit("score", [socketId, yourScore + 1]);
+    // need to get the sids from the usernamesList first and then accordingly to who won update it's score
+    else if (GameCheck(board) && player && GameCheck(board) !== player) socketRef.current.emit("score", [secondPlayer, oponentScore + 1])
+
+  }, [gameOver])
 
   useEffect(() => {
     // Verification User logic
@@ -112,7 +125,7 @@ function TaskManagerProvider({ children }) {
         : navigate("/auth");
     };
 
-    if(!sessionStorage.getItem("username")) verifyCookie();
+    if (!sessionStorage.getItem("username")) verifyCookie();
     else setUser(sessionStorage.getItem("username"));
 
     // Websocket game's logic
@@ -130,7 +143,7 @@ function TaskManagerProvider({ children }) {
       });
 
       socketRef.current.on("listOfUsernames", (usernamesFromBackend) => {
-        setUsersList(usernamesFromBackend);
+        setPlayersUsernamesList(usernamesFromBackend);
       });
 
       socketRef.current.on("send-message", (fullchat) => {
@@ -138,17 +151,17 @@ function TaskManagerProvider({ children }) {
       });
 
       // tic-tac-toe websocket logic
-      socketRef.current.on("player-move", (boardFromBackend) => {
-        console.log(boardFromBackend);
-        setBoard(boardFromBackend);
+      socketRef.current.on("player-move", (board, bool) => {
+        setBoard(board);
       });
 
       socketRef.current.on("playerValues", (playerValues) => {
         setStoredInfo(playerValues);
-        console.log(playerValues, "player Values");
+        // console.log(playerValues, "player Values");
         let temporaryArray = [];
         if (playerValues.length > 0) {
-          setEnableChat(false);
+          setDisableChat(false);
+          // setDisplayScoreBoard(true);
           playerValues.forEach((sid) => {
             if (sid[0] === socketRef.current.id) setPlayer(sid[1][0]);
             temporaryArray.push(sid[0]);
@@ -167,13 +180,27 @@ function TaskManagerProvider({ children }) {
         }
       });
 
-      socketRef.current.on("play-again", (playAgainObject) => {
-        setBoard(playAgainObject[0]);
-        setWin(playAgainObject[1]);
-        setDisplayBtn(playAgainObject[1]);
-        setTie(playAgainObject[1]);
-        setGameOver(playAgainObject[1]);
+      socketRef.current.on("play-again", (board) => {
+        setBoard(board);
+        setWin(false);
+        setTie(false);
+        setGameOver(false);
       });
+
+      socketRef.current.on("rematch", (playersRematchDecisions) => {
+        playersRematchDecisions.forEach(val => {
+          if(val[0] === socketRef.current.id){
+            setRematchYou(val[1]);
+          } else{
+            setRematchOponent(val[1]);
+          }
+        })
+      });
+
+      socketRef.current.on("score", (score) => {
+        if(score[0] === socketRef.current.id) setYourScore(score[1]);
+        else setOponentScore(score[1]);
+      })
 
       socketRef.current.on("playerDisconnect", () => {
         setBoard({
@@ -188,7 +215,7 @@ function TaskManagerProvider({ children }) {
           nine: "",
         });
         setYourTurn(undefined);
-        setEnableChat(false);
+        setDisableChat(false);
       });
     }
 
@@ -201,7 +228,8 @@ function TaskManagerProvider({ children }) {
 
   useEffect(() => {
     if (user && socketId) {
-      console.log(user, "user log");
+      // console.log(user, "user log");
+      // console.log(socketId, "socket id")
       socketRef.current?.emit("listOfUsernames", [user, socketRef.current?.id]);
     }
   }, [user, socketId]);
@@ -235,11 +263,21 @@ function TaskManagerProvider({ children }) {
         setYourTurn,
         gameOver,
         setGameOver,
-        enableChat,
+        disableChat,
         navigate,
         rematch,
         setRematch,
-        usersList,
+        playersUsernamesList,
+        displayScoreBoard,
+        setDisplayScoreBoard,
+        rematchYou,
+        rematchOponent,
+        setRematchOponent,
+        setRematchYou,
+        yourScore,
+        setYourScore,
+        oponentScore,
+        setOponentScore
       }}
     >
       {children}

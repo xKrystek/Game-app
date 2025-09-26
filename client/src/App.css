@@ -4,7 +4,7 @@
 @custom-variant dark (&:is(.dark *));
 #root {
   /* max-width: 1280px; */
-  margin: 0 ;
+  margin: 0;
   /* padding: 2rem; */
   /* text-align: center;
   display: flex;
@@ -13,7 +13,7 @@
   height: 100dvh;
 }
 
-#messages-icon-container{
+#messages-icon-container {
   width: 145px;
   height: 130px;
   position: fixed;
@@ -24,11 +24,11 @@
   align-items: center;
 }
 
-.fade{
+.fade {
   animation: show 2s ease normal;
 }
 
-#messages-icon-container::before{
+#messages-icon-container::before {
   content: "";
   width: 75px;
   height: 50px;
@@ -40,7 +40,7 @@
   border-radius: 50%;
 }
 
-#messages-icon-container::after{
+#messages-icon-container::after {
   content: "...";
   position: absolute;
   color: black;
@@ -50,7 +50,7 @@
   transform: translate(-50%, -50%);
 }
 
-#chat-notification{
+#chat-notification {
   position: absolute;
   border-radius: 50%;
   background-color: red;
@@ -60,12 +60,31 @@
   text-align: center;
   justify-content: center;
   align-items: center;
-  top:-6%;
+  top: -6%;
   right: 16%;
   padding: 13px;
   font-size: 1.2rem;
   font-weight: bold;
   font-family: Arial, Helvetica, sans-serif;
+}
+
+.rematch-player1 {
+  animation: green-light 1s alternate infinite;
+}
+
+.rematch-player2{
+  background-image: radial-gradient(#BA0808 10%, #540404 55%);
+}
+
+@keyframes green-light {
+  0% {
+  background-image: radial-gradient(#21bd21 0%, #228822 41%, #054c05 80%);
+    box-shadow: 0px 0px 0px #45ed45;
+  }
+  100% {
+    box-shadow: 0px 5px 15px #45ed45;
+  background-image: radial-gradient(#45ed45 0%, #1cbe1c 41%, #054c05 80%);
+  }
 }
 
 @keyframes show {
@@ -74,7 +93,7 @@
   }
   50% {
     opacity: 0;
-  } 
+  }
   100% {
     opacity: 1;
   }

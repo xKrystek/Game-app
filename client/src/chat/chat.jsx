@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import { TaskManagerContext } from "../context/taskManager";
 
 function Chat() {
-  const { socketRef, chat, setChat, user, enableChat } =
+  const { socketRef, chat, setChat, user, disableChat } =
     useContext(TaskManagerContext);
   const [inputDisplay, setInputDisplay] = useState("");
   const [message, setMessage] = useState({ sender: null, message: null });
@@ -10,7 +10,7 @@ function Chat() {
   const inputRef = useRef(null);
   const specialKey = useRef(0);
   const secondSpecialKey = useRef(1000);
-  const [displayChat, setDisplayChat] = useState("translate-y-0");
+  const [displayChat, setDisplayChat] = useState("translate-y-full");
 
   function toggleDisplayChat() {
     displayChat === "translate-y-0"
@@ -19,7 +19,6 @@ function Chat() {
   }
 
   useEffect(() => {
-    console.log(user);
     return () => setChat([]);
   }, []);
 
@@ -50,7 +49,7 @@ function Chat() {
       <div
         id="messages-icon-container"
         onClick={toggleDisplayChat}
-        className={displayChat === "translate-y-0" ? "invisible" : "fade"}
+        className={displayChat === "translate-y-full" ? "fade" : "invisible"}
       >
         <div id="chat-notification">4</div>
         <svg
@@ -72,7 +71,7 @@ function Chat() {
       >
         <button
           onClick={toggleDisplayChat}
-          className="text-2xl text-red-500 fixed right-0 bottom-10% mr-0.5 w-10 h-10 flex items-center text-center justify-center"
+          className="text-1xl text-red-500 fixed right-0 bottom-10% mr-0.5 w-10 h-10 flex items-center text-center justify-center"
         >
           -
         </button>
@@ -120,7 +119,7 @@ function Chat() {
             placeholder="Enter the message"
             className="border-2 p-1 flex-1 rounded text-[2vw] xl:text-[1.5vw]"
             ref={inputRef}
-            disabled={enableChat}
+            disabled={disableChat}
           />
           <button
             onClick={sendMessage}

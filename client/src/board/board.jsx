@@ -1,14 +1,11 @@
 import { useContext, useEffect, useRef } from "react";
 import { TaskManagerContext } from "../context/taskManager";
 import { callLogoutUser } from "../services";
-import Chat from "../chat/chat";
-import Scoreboard from "../scoreboard/scoreboard";
 
 function Board() {
   const {
     board,
     player,
-    win,
     setTie,
     tie,
     displayBtn,
@@ -16,23 +13,23 @@ function Board() {
     handleBoardOnClick,
     playAgainButton,
     GameCheck,
-    setWin,
     yourTurn,
     setYourTurn,
     gameOver,
     setGameOver,
-    setUser,
+    setRematch
   } = useContext(TaskManagerContext);
 
   useEffect(() => {
     if (GameCheck(board) === "O" || GameCheck(board) === "X") {
       setGameOver(true);
-      setWin(!win);
       setDisplayBtn(true);
+      setRematch(true);
     } else if (GameCheck(board) === "tie") {
       setYourTurn(undefined);
       setTie(!tie);
       setDisplayBtn(true);
+      setRematch(true);
     }
   }, [board]);
 
@@ -44,7 +41,6 @@ function Board() {
 
   return (
     <div className="flex w-full h-full justify-center items-center">
-      <Scoreboard />
       <p className="fixed top-[10%] left-[49%] translate-x-[-50%] translate-y-[-50%]">
         {gameOver ? "Game Over" : displayYourTurn()}
       </p>
@@ -88,7 +84,7 @@ function Board() {
           <div className="border-solid border-3 border-white place-content-center nine">
             {board.nine}
           </div>
-          {win ? (
+          {gameOver ? (
             <p className="animation1 text-[2rem] 2xl:text-[1.5vw] xl:text-[2vw] translate-x-1/2 translate-y-1/2 top-[15%] right-[51%] fixed">
               {GameCheck(board) === player ? "You won" : "You lost"}
             </p>
@@ -110,7 +106,6 @@ function Board() {
           </button>
         </>
       ) : null}
-      <Chat />
     </div>
   );
 }
