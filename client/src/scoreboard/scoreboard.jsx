@@ -12,9 +12,7 @@ function Scoreboard() {
     setRematchYou,
     setRematchOponent,
     yourScore,
-    setYourScore,
     oponentScore,
-    setOponentScore,
   } = useContext(TaskManagerContext);
 
   useEffect(() => {
@@ -37,13 +35,13 @@ function Scoreboard() {
       >
         <div id="user1">
           {playersUsernamesList?.map((x) =>
-            x[1] === socketRef.current.id ? x[0] : null
+            x[1] === socketRef.current?.id ? x[0] : null
           )}
         </div>
         <p className="mx-3">vs</p>
         <div id="user2">
           {playersUsernamesList?.map((x) =>
-            x[1] !== socketRef.current.id ? x[0] : null
+            x[1] !== socketRef.current?.id ? x[0] : null
           )}
         </div>
       </div>

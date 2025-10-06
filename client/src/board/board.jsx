@@ -57,31 +57,31 @@ function Board() {
           >
             LogOut
           </button>
-          <div className="border-solid border-3 border-white place-content-center one">
+          <div data-cell="one" className="border-solid border-3 border-white place-content-center">
             {board.one}
           </div>
-          <div className="border-solid border-3 border-white place-content-center two">
+          <div data-cell="two" className="border-solid border-3 border-white place-content-center">
             {board.two}
           </div>
-          <div className="border-solid border-3 border-white place-content-center three">
+          <div data-cell="three" className="border-solid border-3 border-white place-content-center">
             {board.three}
           </div>
-          <div className="border-solid border-3 border-white place-content-center four">
+          <div data-cell="four" className="border-solid border-3 border-white place-content-center">
             {board.four}
           </div>
-          <div className="border-solid border-3 border-white place-content-center five">
+          <div data-cell="five" className="border-solid border-3 border-white place-content-center">
             {board.five}
           </div>
-          <div className="border-solid border-3 border-white place-content-center six">
+          <div data-cell="six" className="border-solid border-3 border-white place-content-center">
             {board.six}
           </div>
-          <div className="border-solid border-3 border-white place-content-center seven">
+          <div data-cell="seven" className="border-solid border-3 border-white place-content-center">
             {board.seven}
           </div>
-          <div className="border-solid border-3 border-white place-content-center eight">
+          <div data-cell="eight" className="border-solid border-3 border-white place-content-center">
             {board.eight}
           </div>
-          <div className="border-solid border-3 border-white place-content-center nine">
+          <div data-cell="nine" className="border-solid border-3 border-white place-content-center">
             {board.nine}
           </div>
           {gameOver ? (

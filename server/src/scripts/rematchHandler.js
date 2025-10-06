@@ -1,4 +1,4 @@
-function rematchHandler(TIC_TAC_TOE, rematchState, roomToJoin, socket) {
+function rematchHandler(TIC_TAC_TOE, rematchState, roomToJoin) {
   if (TIC_TAC_TOE.adapter.rooms.get(roomToJoin).size === 2) {
     rematchState[roomToJoin] = [];
 

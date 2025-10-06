@@ -11,7 +11,9 @@ function Chat() {
   const specialKey = useRef(0);
   const secondSpecialKey = useRef(1000);
   const [displayChat, setDisplayChat] = useState("translate-y-full");
-
+  const [unreadMessagesNumber, setUnreadMessagesNumber] = useState(0);
+  const [numberOfSeenMessages, setNumberOfSeenMessages] = useState(0);
+  
   function toggleDisplayChat() {
     displayChat === "translate-y-0"
       ? setDisplayChat("translate-y-full")
@@ -34,6 +36,16 @@ function Chat() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [chat]);
 
+
+useEffect(() => {
+  if (displayChat === "translate-y-0") {
+    setNumberOfSeenMessages(chat.length); // reset last seen
+    setUnreadMessagesNumber(0);
+  } else {
+    setUnreadMessagesNumber(chat.length - numberOfSeenMessages);
+  }
+}, [chat, displayChat]);
+
   function sendMessage() {
     if (inputDisplay.trim() === "") return;
     setMessage({
@@ -51,7 +63,7 @@ function Chat() {
         onClick={toggleDisplayChat}
         className={displayChat === "translate-y-full" ? "fade" : "invisible"}
       >
-        <div id="chat-notification">4</div>
+        { unreadMessagesNumber === 0 ? null : <div id="chat-notification">{unreadMessagesNumber}</div>}
         <svg
           width="160"
           height="129"
@@ -69,12 +81,14 @@ function Chat() {
         className={`h-[40%] lg:aspect-[13/10] aspect-1/1 border border-blue-300 flex-col fixed right-0 bottom-0 flex ${displayChat} transition-transform delay-0 duration-1000 ease-in-out bg-black`}
         id="chat"
       >
-        <button
-          onClick={toggleDisplayChat}
-          className="text-1xl text-red-500 fixed right-0 bottom-10% mr-0.5 w-10 h-10 flex items-center text-center justify-center"
-        >
-          -
-        </button>
+        <div className="bg-[#201f1f] w-full h-10 flex justify-end items-center">
+          <button
+            onClick={toggleDisplayChat}
+            className="text-1xl text-red-500 w-5 h-8 flex items-center text-center justify-center mr-1"
+          >
+            -
+          </button>
+        </div>
         {/* Messages */}
         <div className="flex-1 flex flex-col overflow-y-auto p-2 space-y-2">
           {chat.map((msg, index) => (

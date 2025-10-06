@@ -65,6 +65,8 @@ TIC_TAC_TOE.on("connection", (socket) => {
   // join room
   const roomToJoin = room_join(TIC_TAC_TOE.adapter.rooms, RoomsIndex);
 
+  const socketIdForDisconnect = socket.id;
+
   socket.join(roomToJoin);
 
   if (!fullChat[roomToJoin]) fullChat[roomToJoin] = [];
@@ -137,7 +139,7 @@ TIC_TAC_TOE.on("connection", (socket) => {
 
   socket.on("score", (score) => {
     TIC_TAC_TOE.to(roomToJoin).emit("score", score);
-  })
+  });
 
   // On received message
   socket.on("send-message", (arrayOfMessages) => {
@@ -152,27 +154,38 @@ TIC_TAC_TOE.on("connection", (socket) => {
     if (!TIC_TAC_TOE.adapter.rooms.get(roomToJoin)) {
       delete fullChat[roomToJoin];
       delete gameState[roomToJoin];
-    } else
+      delete usernamesList[roomToJoin];
+      delete rematchState[roomToJoin];
+    } else {
       TIC_TAC_TOE.to(roomToJoin).emit(
         "send-message",
         (fullChat[roomToJoin] = [])
       );
-    TIC_TAC_TOE.to(roomToJoin).emit(
-      "play-again",
-      {
-        one: "",
-        two: "",
-        three: "",
-        four: "",
-        five: "",
-        six: "",
-        seven: "",
-        eight: "",
-        nine: "",
-      },
-      false
-    );
-    TIC_TAC_TOE.to(roomToJoin).emit("playerDisconnect");
+      TIC_TAC_TOE.to(roomToJoin).emit(
+        "play-again",
+        {
+          one: "",
+          two: "",
+          three: "",
+          four: "",
+          five: "",
+          six: "",
+          seven: "",
+          eight: "",
+          nine: "",
+        },
+        false
+      );
+      TIC_TAC_TOE.to(roomToJoin).emit("playerDisconnect");
+
+      usernamesList[roomToJoin].forEach((x, i) => {
+        x.forEach(y => {
+          if(y === socketIdForDisconnect) usernamesList[roomToJoin].splice(i, 1);
+        })
+      })
+
+      TIC_TAC_TOE.to(roomToJoin).emit("listOfUsernames", usernamesList[roomToJoin]);
+    }
     console.log("disconnected");
     console.log(TIC_TAC_TOE.adapter.rooms, "all rooms");
     console.log(TIC_TAC_TOE.adapter.rooms.size, "amount of rooms");

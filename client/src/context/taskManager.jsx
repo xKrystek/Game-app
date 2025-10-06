@@ -70,9 +70,12 @@ function TaskManagerProvider({ children }) {
   const [socketId, setSocketId] = useState(null);
 
   function handleBoardOnClick(event) {
-    const cell = event.target.classList[4];
+    const cellDiv = event.target.closest("[data-cell]");
+    if (!cellDiv) return;
 
-    if (!yourTurn || board[cell]) return; // prevent overriding a filled cell
+    const cell = cellDiv.dataset.cell;
+
+    if (!yourTurn || board[cell]) return;
 
     const updatedBoard = { ...board, [cell]: player };
 
@@ -92,15 +95,17 @@ function TaskManagerProvider({ children }) {
   }
 
   useEffect(() => {
-
     let secondPlayer;
-    playersUsernamesList.forEach(user => user[1] !== socketId ? secondPlayer = user[1] : null);
+    playersUsernamesList.forEach((user) =>
+      user[1] !== socketId ? (secondPlayer = user[1]) : null
+    );
 
-    if(GameCheck(board) && player && GameCheck(board) === player) socketRef.current.emit("score", [socketId, yourScore + 1]);
+    if (GameCheck(board) && player && GameCheck(board) === player)
+      socketRef.current.emit("score", [socketId, yourScore + 1]);
     // need to get the sids from the usernamesList first and then accordingly to who won update it's score
-    else if (GameCheck(board) && player && GameCheck(board) !== player) socketRef.current.emit("score", [secondPlayer, oponentScore + 1])
-
-  }, [gameOver])
+    else if (GameCheck(board) && player && GameCheck(board) !== player)
+      socketRef.current.emit("score", [secondPlayer, oponentScore + 1]);
+  }, [gameOver]);
 
   useEffect(() => {
     // Verification User logic
@@ -188,39 +193,56 @@ function TaskManagerProvider({ children }) {
       });
 
       socketRef.current.on("rematch", (playersRematchDecisions) => {
-        playersRematchDecisions.forEach(val => {
-          if(val[0] === socketRef.current.id){
+        playersRematchDecisions.forEach((val) => {
+          if (val[0] === socketRef.current.id) {
             setRematchYou(val[1]);
-          } else{
+          } else {
             setRematchOponent(val[1]);
           }
-        })
+        });
       });
 
       socketRef.current.on("score", (score) => {
-        if(score[0] === socketRef.current.id) setYourScore(score[1]);
+        if (score[0] === socketRef.current.id) setYourScore(score[1]);
         else setOponentScore(score[1]);
-      })
+      });
 
       socketRef.current.on("playerDisconnect", () => {
-        setBoard({
-          one: "",
-          two: "",
-          three: "",
-          four: "",
-          five: "",
-          six: "",
-          seven: "",
-          eight: "",
-          nine: "",
-        });
         setYourTurn(undefined);
         setDisableChat(false);
+        setRematch(false);
+        setRematchOponent(false);
+        setRematchYou(false);
+        setDisplayScoreBoard(false);
+        setYourScore(0);
+        setOponentScore(0);
+        setDisplayBtn(false);
+        setGameOver(false);
       });
     }
 
     return () => {
-      console.log("resolved");
+      setBoard({
+        one: "",
+        two: "",
+        three: "",
+        four: "",
+        five: "",
+        six: "",
+        seven: "",
+        eight: "",
+        nine: "",
+      });
+      setYourTurn(undefined);
+      setDisableChat(false);
+      setRematch(false);
+      setRematchOponent(false);
+      setRematchYou(false);
+      setDisplayScoreBoard(false);
+      setYourScore(0);
+      setOponentScore(0);
+      setDisplayBtn(false);
+      setGameOver(false);
       socketRef.current?.disconnect();
       socketRef.current = null;
     };
@@ -277,7 +299,7 @@ function TaskManagerProvider({ children }) {
         yourScore,
         setYourScore,
         oponentScore,
-        setOponentScore
+        setOponentScore,
       }}
     >
       {children}
