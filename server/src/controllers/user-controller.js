@@ -1,22 +1,23 @@
-const user = require("../models/User");
-const jwt = require("jsonwebtoken");
-const bcrypt = require("bcryptjs");
-const joi = require("joi");
+require('dotenv').config();
+const user = require('../models/User');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
+const joi = require('joi');
 
 const registerSchema = joi.object({
   name: joi.string().required(),
   email: joi.string().email().required(),
-  password: joi.string().min(6).required(),
+  password: joi.string().min(6).required()
 });
 
 const loginSchema = joi.object({
   email: joi.string().email().required(),
-  password: joi.string().min(6).required(),
+  password: joi.string().required()
 });
 
 const generateToken = (getId) => {
-  return jwt.sign({ getId }, "DEFAULT_SECRET_KEY", {
-    expiresIn: 3 * 24 * 60 * 60,
+  return jwt.sign({ getId }, `${process.env.JWT_SECRET}`, {
+    expiresIn: 3 * 24 * 60 * 60
   });
 };
 
@@ -25,11 +26,12 @@ const registerUser = async (req, res) => {
 
   const { error } = registerSchema.validate({ name, email, password });
 
-  if (error)
+  if (error) {
     return res.status(400).json({
       success: false,
-      message: error.details[0].message,
+      message: error.details[0].message
     });
+  }
 
   try {
     const isEmailAlreadyInUse = await user.findOne({ email });
@@ -37,7 +39,7 @@ const registerUser = async (req, res) => {
     if (isEmailAlreadyInUse) {
       return res.status(400).json({
         success: false,
-        message: "Email is already in use",
+        message: 'Email is already in use'
       });
     } else {
       const hashedPassword = await bcrypt.hash(password, 12);
@@ -45,29 +47,29 @@ const registerUser = async (req, res) => {
       const newUser = await user.create({
         username: name,
         email,
-        password: hashedPassword,
+        password: hashedPassword
       });
 
       if (newUser) {
         const token = generateToken(newUser._id);
 
-        res.cookie("token", token);
+        res.cookie('token', token);
       }
 
       res.status(200).json({
         success: true,
-        message: "User registered successfully",
+        message: 'User registered successfully',
         userData: {
           username: newUser.username,
-          email: newUser.email,
-        },
+          email: newUser.email
+        }
       });
     }
   } catch (error) {
     console.log(error);
     return res.status(500).json({
       success: false,
-      message: "Some error occured",
+      message: 'Some error occured'
     });
   }
 };
@@ -77,11 +79,12 @@ const loginUser = async (req, res) => {
 
   const { error } = loginSchema.validate({ email, password });
 
-  if (error)
+  if (error) {
     return res.status(400).json({
       success: false,
-      message: error.details[0].message,
+      message: error.details[0].message
     });
+  }
 
   try {
     const userExists = await user.findOne({ email });
@@ -94,42 +97,43 @@ const loginUser = async (req, res) => {
 
       if (comparePasswords) {
         const token = generateToken(userExists._id);
-        res.cookie("token", token);
+        res.cookie('token', token);
         return res.status(200).json({
           success: true,
-          message: "User logged in successfully",
+          message: 'User logged in successfully'
         });
       } else {
         return res.status(400).json({
           success: false,
-          message: "Passwords do not match",
+          message: 'Wrong credentials'
         });
       }
     } else {
       return res.status(400).json({
         success: false,
-        message: "Wrong credentials",
+        message: 'Wrong credentials'
       });
     }
   } catch (error) {
     console.log(error);
     return res.status(500).json({
       success: false,
-      message: "Some error occured",
+      message: 'Some error occured',
+      error
     });
   }
 };
 
 const logoutUser = async (req, res) => {
-  res.cookie("token", "", {
+  res.cookie('token', '', {
     httpOnly: true
   });
 
-  console.log("logged Out");
+  console.log('logged Out');
 
   return res.status(200).json({
     success: true,
-    message: "Logout successful",
+    message: 'Logout successful'
   });
 };
 

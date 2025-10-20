@@ -1,5 +1,6 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useContext, useEffect} from "react";
-import { TaskManagerContext } from "../context/taskManager";
+import { TaskManagerContext } from "../context/taskManagerContext";
 
 function Scoreboard() {
   const {

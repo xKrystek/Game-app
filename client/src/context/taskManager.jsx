@@ -1,11 +1,12 @@
-import { createContext, useEffect, useState, useRef } from "react";
-import { useForm } from "react-hook-form";
+/* eslint-disable react-hooks/exhaustive-deps */
+import { useEffect, useState, useRef } from "react";
+// import { useForm } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router-dom";
 import { callUserAuthApi } from "../services";
 import { io } from "socket.io-client";
 import GameCheck from "../board/game-check";
+import { TaskManagerContext } from "./taskManagerContext";
 
-export const TaskManagerContext = createContext(null);
 
 function TaskManagerProvider({ children }) {
   // Board constans
@@ -22,15 +23,15 @@ function TaskManagerProvider({ children }) {
   });
 
   // Form constans
-  const formData = useForm({
-    defaultValues: {
-      name: "",
-      label: "",
-      placeholder: "",
-      componentType: "",
-      type: "",
-    },
-  });
+  // const formData = useForm({
+  //   defaultValues: {
+  //     name: "",
+  //     label: "",
+  //     placeholder: "",
+  //     componentType: "",
+  //     type: "",
+  //   },
+  // });
 
   // Logging and navigation constans
   const [LoggingView, setLoggingView] = useState(true);
@@ -156,7 +157,7 @@ function TaskManagerProvider({ children }) {
       });
 
       // tic-tac-toe websocket logic
-      socketRef.current.on("player-move", (board, bool) => {
+      socketRef.current.on("player-move", (board) => {
         setBoard(board);
       });
 

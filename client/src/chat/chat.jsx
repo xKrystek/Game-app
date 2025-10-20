@@ -1,5 +1,6 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { TaskManagerContext } from "../context/taskManager";
+import { TaskManagerContext } from "../context/taskManagerContext";
 
 function Chat() {
   const { socketRef, chat, setChat, user, disableChat } =
@@ -21,7 +22,10 @@ function Chat() {
   }
 
   useEffect(() => {
-    return () => setChat([]);
+    return () =>{
+      setChat([]);
+      setUnreadMessagesNumber(0);
+    } 
   }, []);
 
   // Emit new message

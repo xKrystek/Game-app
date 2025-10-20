@@ -1,37 +1,27 @@
-function room_join(rooms, roomsIndex){
+function roomJoin (rooms, roomsIndex) {
+  const ROOMS_NAMES = [];
 
-    const collator = new Intl.Collator(undefined, { numeric: true });
+  for (const keys of rooms.keys()) {
+    // console.log(keys, "listed rooms");
+    ROOMS_NAMES.push(keys);
+  }
 
-    const ROOMS_NAMES = [];
+  const filtered = ROOMS_NAMES.filter((x) => x.match(/^room/));
 
-    for(const keys of rooms.keys()){
-        // console.log(keys, "listed rooms");
-        ROOMS_NAMES.push(keys);
-    }
+  // console.log(filtered, "filtered");
 
-    const filtered = ROOMS_NAMES.filter((x) => x.match(/^room/));
+  // eslint-disable-next-line array-callback-return, no-useless-return
+  const result = filtered.filter((x) => {
+    if (rooms.get(x).size < 2) return x;
+  });
+  // console.log(result, "result")
 
-    // console.log(filtered, "filtered");
+  if (filtered.length > 0 && result.length !== 0) {
+    return `${result[0]}`;
+  }
 
-    const result = filtered.filter(x => {
-        if(rooms.get(x).size < 2) return x;
-    })
-    // console.log(result, "result")
-
-    if(filtered.length > 0 && result.length !== 0){
-
-            // sorting is used so that the user joins possible lowest numbered existing room
-            // const sorted = result.sort(collator.compare);
-            // console.log(sorted, "sorted");
-            // const spliced = result.splice(0, 1);
-            // console.log(spliced, "spliced");
-            // console.log("triggered")
-            // console.log(result, "spliced result")
-            return `${result[0]}`;
-    } 
-
-    // console.log("reached");
-    return `room${++roomsIndex.roomNumber}`;
+  // console.log("reached");
+  return `room${++roomsIndex.roomNumber}`;
 }
 
 // const roomsSubsitute = new Map([
@@ -39,6 +29,6 @@ function room_join(rooms, roomsIndex){
 //     ["asda", 2]
 // ]);
 
-// room_join(roomsSubsitute);
+// roomJoin(roomsSubsitute);
 
-module.exports = room_join;
+module.exports = roomJoin;

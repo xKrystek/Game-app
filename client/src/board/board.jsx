@@ -1,5 +1,6 @@
-import { useContext, useEffect, useRef } from "react";
-import { TaskManagerContext } from "../context/taskManager";
+/* eslint-disable react-hooks/exhaustive-deps */
+import { useContext, useEffect } from "react";
+import { TaskManagerContext } from "../context/taskManagerContext";
 import { callLogoutUser } from "../services";
 
 function Board() {
