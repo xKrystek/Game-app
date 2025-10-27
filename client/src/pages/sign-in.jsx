@@ -27,7 +27,7 @@ function SignIn() {
         setError(null); // Clear error if any
         navigate("/games");
       } else {
-        setError(response.response.data.message || "Something went wrong.");
+        setError(response?.response?.data.message || "Something went wrong.");
       }
     } catch (e) {
       setError(e.message); // This will now show your error message

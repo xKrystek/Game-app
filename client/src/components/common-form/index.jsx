@@ -1,10 +1,13 @@
-import { Controller } from "react-hook-form";
+import { Controller } from 'react-hook-form';
 
 function CommonForm({ formControls = [], form, buttonText, handleSubmit }) {
   return (
-    <form onSubmit={form.handleSubmit(handleSubmit)} className="w-xl h-[300px] grid grid-cols-1">
+    <form
+      onSubmit={form.handleSubmit(handleSubmit)}
+      className="lg:w-xl sm:w-sm md:w-md w-50px h-[300px] grid grid-cols-1"
+    >
       {formControls.map((controlItem, index) =>
-        controlItem.componentType === "input" ? (
+        controlItem.componentType === 'input' ? (
           <div className="flex flex-col" key={index}>
             <label htmlFor={controlItem.name}>{controlItem.label}</label>
             <Controller
@@ -12,6 +15,7 @@ function CommonForm({ formControls = [], form, buttonText, handleSubmit }) {
               name={controlItem.name}
               render={({ field }) => (
                 <input
+                  id={controlItem.name}
                   type={controlItem.type}
                   name={controlItem.name}
                   placeholder={controlItem.placeholder}
@@ -24,7 +28,9 @@ function CommonForm({ formControls = [], form, buttonText, handleSubmit }) {
           </div>
         ) : null
       )}
-      <button type="submit" className="text-amber-50">{buttonText || "Submit"}</button>
+      <button type="submit" className="text-amber-50">
+        {buttonText || 'Submit'}
+      </button>
     </form>
   );
 }

@@ -17,7 +17,7 @@ require('./database/db.js');
 
 app.use(
   cors({
-    origin: [`${process.env.HOST_URL}`],
+    origin: [`${process.env.HOST_URL}`, 'http://192.168.1.173:5173'],
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true
   })
@@ -43,7 +43,7 @@ const httpserver = http.createServer(app);
 
 const io = new Server(httpserver, {
   cors: {
-    origin: `${process.env.HOST_URL}`,
+    origin: [`${process.env.HOST_URL}`, 'http://192.168.1.173:5173'],
     credentials: true
   }
 });
@@ -64,6 +64,7 @@ const TIC_TAC_TOE = io.of('/tic-tac-toe');
 
 TIC_TAC_TOE.on('connection', (socket) => {
   // join room
+  console.log('socket connected');
   const roomToJoin = roomJoin(TIC_TAC_TOE.adapter.rooms, RoomsIndex);
 
   const socketIdForDisconnect = socket.id;

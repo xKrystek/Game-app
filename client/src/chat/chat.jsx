@@ -66,6 +66,7 @@ useEffect(() => {
         id="messages-icon-container"
         onClick={toggleDisplayChat}
         className={displayChat === "translate-y-full" ? "fade" : "invisible"}
+        data-testid="messages-icon-container"
       >
         { unreadMessagesNumber === 0 ? null : <div id="chat-notification">{unreadMessagesNumber}</div>}
         <svg
@@ -84,6 +85,7 @@ useEffect(() => {
       <div
         className={`h-[40%] lg:aspect-[13/10] aspect-1/1 border border-blue-300 flex-col fixed right-0 bottom-0 flex ${displayChat} transition-transform delay-0 duration-1000 ease-in-out bg-black`}
         id="chat"
+        data-testid="chat"
       >
         <div className="bg-[#201f1f] w-full h-10 flex justify-end items-center">
           <button

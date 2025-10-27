@@ -16,7 +16,7 @@ function roomJoin (rooms, roomsIndex) {
   });
   // console.log(result, "result")
 
-  if (filtered.length > 0 && result.length !== 0) {
+  if (filtered.length > 0 && result.length > 0) {
     return `${result[0]}`;
   }
 

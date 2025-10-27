@@ -9,7 +9,7 @@ function Authpage() {
     <div className="flex flex-col items-center justify-center w-full h-full">
       {loggingView ? <SignIn /> : <SignUp />}
       <button
-        className="w-[300px] mt-3"
+        className="lg:w-xl sm:w-sm md:w-md mt-3"
         onClick={() => setLoggingView(!loggingView)}
       >
         {loggingView ? "Go to Sign up" : "Go to Sign in"}
