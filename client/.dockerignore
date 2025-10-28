@@ -1,0 +1,26 @@
+# dependencies
+node_modules
+npm-debug.log
+yarn-error.log
+
+# local env files
+.env
+.env.local
+.env.*.local
+
+# logs
+logs
+*.log
+*.log.*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker files (optional, to avoid copying the Dockerfile itself)
+Dockerfile
+.dockerignore
+
+# build outputs
+dist
+build

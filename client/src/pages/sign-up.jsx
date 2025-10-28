@@ -1,17 +1,17 @@
-import { useForm } from "react-hook-form";
-import { signUpControls } from "../config";
-import CommonForm from "../components/common-form";
-import { callRegisterUserApi } from "../services/index";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useForm } from 'react-hook-form';
+import { signUpControls } from '../config/formConfig';
+import CommonForm from '../components/common-form';
+import { callRegisterUserApi } from '../services/index';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 function SignUp() {
   const formData = useForm({
     defaultValues: {
-      name: "",
-      email: "",
-      password: "",
-    },
+      name: '',
+      email: '',
+      password: ''
+    }
   });
 
   const [error, setError] = useState(null);
@@ -26,9 +26,9 @@ function SignUp() {
         formData.reset();
         setDone(response.message);
         setError(null); // Clear error if any
-        navigate("/");
+        navigate('/');
       } else {
-        setError(response.response.data.message || "Something went wrong.");
+        setError(response.response.data.message || 'Something went wrong.');
       }
     } catch (e) {
       setError(e.message); // This will now show your error message
@@ -40,7 +40,7 @@ function SignUp() {
       <CommonForm
         formControls={signUpControls}
         form={formData}
-        buttonText={"Sign Up"}
+        buttonText={'Sign Up'}
         handleSubmit={handleSubmit}
       />
       {error ? (

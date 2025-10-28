@@ -1,0 +1,31 @@
+version: '3'
+services:
+  mongo:
+    image: mongo:7
+    container_name: mongo
+    ports:
+      - "27017:27017"
+  server:
+    build: ./server
+    container_name: server
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mongo
+    environment:
+      - MONGODB_URL=mongodb://mongo:27017/tic-tac-toe
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+  client:
+    build: ./client
+    container_name: client
+    ports:
+      - "5173:5173"
+    depends_on:
+      - server
+    environment:
+      - REACT_APP_API_URL=http://server:5000
+    volumes:
+      - ./client:/app
+      - /app/node_modules

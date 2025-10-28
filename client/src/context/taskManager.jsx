@@ -1,10 +1,10 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useEffect, useState, useRef } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { callUserAuthApi } from "../services";
-import { io } from "socket.io-client";
-import GameCheck from "../board/game-check";
-import { TaskManagerContext } from "./taskManagerContext";
+import { useEffect, useState, useRef } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { callUserAuthApi } from '../services';
+import { io } from 'socket.io-client';
+import GameCheck from '../board/game-check';
+import { TaskManagerContext } from './taskManagerContext';
 
 const getBackendUrl = () => {
   if (typeof window !== 'undefined') {
@@ -22,9 +22,15 @@ function TaskManagerProvider({ children }) {
   // 🟢 BOARD STATE
   // -----------------------------
   const [board, setBoard] = useState({
-    one: "", two: "", three: "",
-    four: "", five: "", six: "",
-    seven: "", eight: "", nine: "",
+    one: '',
+    two: '',
+    three: '',
+    four: '',
+    five: '',
+    six: '',
+    seven: '',
+    eight: '',
+    nine: ''
   });
 
   // -----------------------------
@@ -76,7 +82,7 @@ function TaskManagerProvider({ children }) {
   // ⚙️ HANDLERS
   // -----------------------------
   function handleBoardOnClick(event) {
-    const cellDiv = event.target.closest("[data-cell]");
+    const cellDiv = event.target.closest('[data-cell]');
     if (!cellDiv) return;
 
     const cell = cellDiv.dataset.cell;
@@ -84,16 +90,18 @@ function TaskManagerProvider({ children }) {
 
     const updatedBoard = { ...board, [cell]: player };
 
-    storedInfo[storedCurrentSidsIndex][1][1] = !storedInfo[storedCurrentSidsIndex][1][1];
-    storedInfo[storedOtherSidsIndex][1][1] = !storedInfo[storedOtherSidsIndex][1][1];
+    storedInfo[storedCurrentSidsIndex][1][1] =
+      !storedInfo[storedCurrentSidsIndex][1][1];
+    storedInfo[storedOtherSidsIndex][1][1] =
+      !storedInfo[storedOtherSidsIndex][1][1];
 
-    socketRef.current.emit("player-move", updatedBoard, storedInfo);
+    socketRef.current.emit('player-move', updatedBoard, storedInfo);
   }
 
   function playAgainButton() {
-    socketRef.current.emit("play-again");
+    socketRef.current.emit('play-again');
     setDisplayBtn(false);
-    socketRef.current.emit("rematch", [socketId, true]);
+    socketRef.current.emit('rematch', [socketId, true]);
   }
 
   // -----------------------------
@@ -106,9 +114,9 @@ function TaskManagerProvider({ children }) {
     );
 
     if (GameCheck(board) && player && GameCheck(board) === player)
-      socketRef.current.emit("score", [socketId, yourScore + 1]);
+      socketRef.current.emit('score', [socketId, yourScore + 1]);
     else if (GameCheck(board) && player && GameCheck(board) !== player)
-      socketRef.current.emit("score", [secondPlayer, oponentScore + 1]);
+      socketRef.current.emit('score', [secondPlayer, oponentScore + 1]);
   }, [gameOver]);
 
   // -----------------------------
@@ -117,51 +125,58 @@ function TaskManagerProvider({ children }) {
   useEffect(() => {
     // 🪪 Verify User
     const verifyCookie = async () => {
-      console.log("called");
+      console.log('called');
       const response = await callUserAuthApi();
-      console.log(response, "response");
+      console.log(response, 'response');
 
       if (response?.userCredentials) {
-        console.log(response.userCredentials, "credentials");
+        console.log(response.userCredentials, 'credentials');
         setUser(response?.userCredentials.username);
-        sessionStorage.setItem("username", response?.userCredentials.username);
+        sessionStorage.setItem('username', response?.userCredentials.username);
       }
 
       return response?.success
         ? navigate(
-            location.pathname === "/" || location.pathname === "/auth"
-              ? "/games"
+            location.pathname === '/' || location.pathname === '/auth'
+              ? '/games'
               : `${location.pathname}`
           )
-        : navigate("/auth");
+        : navigate('/auth');
     };
 
-    if (!sessionStorage.getItem("username")) verifyCookie();
-    else setUser(sessionStorage.getItem("username"));
+    if (!sessionStorage.getItem('username')) verifyCookie();
+    else {
+      setUser(sessionStorage.getItem('username'));
+      navigate(
+        location.pathname === '/' || location.pathname === '/auth'
+          ? '/games'
+          : `${location.pathname}`
+      );
+    }
 
     // 🎮 SOCKET SETUP — only on game route
-    if (location.pathname === "/tic-tac-toe") {
+    if (location.pathname === '/tic-tac-toe' && sessionStorage.getItem('username')) {
       socketRef.current = io(`${BACKEND_URL}/tic-tac-toe`);
 
       // --- CONNECT EVENT ---
-      socketRef.current.on("connect", () => {
+      socketRef.current.on('connect', () => {
         setSocketId(socketRef.current.id);
       });
 
       // --- LISTENERS ---
-      socketRef.current.on("listOfUsernames", (usernamesFromBackend) => {
+      socketRef.current.on('listOfUsernames', (usernamesFromBackend) => {
         setPlayersUsernamesList(usernamesFromBackend);
       });
 
-      socketRef.current.on("send-message", (fullchat) => {
+      socketRef.current.on('send-message', (fullchat) => {
         setChat(fullchat);
       });
 
-      socketRef.current.on("player-move", (board) => {
+      socketRef.current.on('player-move', (board) => {
         setBoard(board);
       });
 
-      socketRef.current.on("playerValues", (playerValues) => {
+      socketRef.current.on('playerValues', (playerValues) => {
         setStoredInfo(playerValues);
 
         let temporaryArray = [];
@@ -188,26 +203,26 @@ function TaskManagerProvider({ children }) {
         }
       });
 
-      socketRef.current.on("play-again", (board) => {
+      socketRef.current.on('play-again', (board) => {
         setBoard(board);
         setWin(false);
         setTie(false);
         setGameOver(false);
       });
 
-      socketRef.current.on("rematch", (playersRematchDecisions) => {
+      socketRef.current.on('rematch', (playersRematchDecisions) => {
         playersRematchDecisions.forEach((val) => {
           if (val[0] === socketRef.current.id) setRematchYou(val[1]);
           else setRematchOponent(val[1]);
         });
       });
 
-      socketRef.current.on("score", (score) => {
+      socketRef.current.on('score', (score) => {
         if (score[0] === socketRef.current.id) setYourScore(score[1]);
         else setOponentScore(score[1]);
       });
 
-      socketRef.current.on("playerDisconnect", () => {
+      socketRef.current.on('playerDisconnect', () => {
         setYourTurn(undefined);
         setDisableChat(false);
         setRematch(false);
@@ -224,9 +239,15 @@ function TaskManagerProvider({ children }) {
     // 🧹 CLEANUP
     return () => {
       setBoard({
-        one: "", two: "", three: "",
-        four: "", five: "", six: "",
-        seven: "", eight: "", nine: "",
+        one: '',
+        two: '',
+        three: '',
+        four: '',
+        five: '',
+        six: '',
+        seven: '',
+        eight: '',
+        nine: ''
       });
       setYourTurn(undefined);
       setDisableChat(false);
@@ -249,7 +270,7 @@ function TaskManagerProvider({ children }) {
   // -----------------------------
   useEffect(() => {
     if (user && socketId) {
-      socketRef.current?.emit("listOfUsernames", [user, socketRef.current?.id]);
+      socketRef.current?.emit('listOfUsernames', [user, socketRef.current?.id]);
     }
   }, [user, socketId]);
 
@@ -259,27 +280,47 @@ function TaskManagerProvider({ children }) {
   return (
     <TaskManagerContext.Provider
       value={{
-        board, setBoard,
-        player, user, setUser,
-        loading, setLoading,
-        LoggingView, setLoggingView,
-        location, socketRef,
-        chat, setChat,
-        playAgainButton, handleBoardOnClick,
-        win, setWin,
-        tie, setTie,
-        displayBtn, setDisplayBtn,
+        board,
+        setBoard,
+        player,
+        user,
+        setUser,
+        loading,
+        setLoading,
+        LoggingView,
+        setLoggingView,
+        location,
+        socketRef,
+        chat,
+        setChat,
+        playAgainButton,
+        handleBoardOnClick,
+        win,
+        setWin,
+        tie,
+        setTie,
+        displayBtn,
+        setDisplayBtn,
         GameCheck,
-        yourTurn, setYourTurn,
-        gameOver, setGameOver,
-        disableChat, navigate,
-        rematch, setRematch,
+        yourTurn,
+        setYourTurn,
+        gameOver,
+        setGameOver,
+        disableChat,
+        navigate,
+        rematch,
+        setRematch,
         playersUsernamesList,
-        displayScoreBoard, setDisplayScoreBoard,
-        rematchYou, rematchOponent,
-        setRematchOponent, setRematchYou,
-        yourScore, setYourScore,
-        oponentScore, setOponentScore,
+        displayScoreBoard,
+        setDisplayScoreBoard,
+        rematchYou,
+        rematchOponent,
+        setRematchOponent,
+        setRematchYou,
+        yourScore,
+        setYourScore,
+        oponentScore,
+        setOponentScore
       }}
     >
       {children}

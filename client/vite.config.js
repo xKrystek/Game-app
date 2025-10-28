@@ -6,7 +6,13 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
-      '@': import.meta.cwd()
+      '@': 'C:\\Users\\User\\Programowanie\\React\\tic-tac-toe\\client'
+    }
+  },
+  server: {
+    watch: {
+      usePolling: true, // required for Docker volume mounts
+      interval: 100 // optional: check file changes every 100ms
     }
   }
 });

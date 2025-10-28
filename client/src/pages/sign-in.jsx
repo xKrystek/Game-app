@@ -1,16 +1,16 @@
-import { useForm } from "react-hook-form";
-import { signInControls } from "../config";
-import CommonForm from "../components/common-form";
-import { callLoginUserApi } from "../services/index";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useForm } from 'react-hook-form';
+import { signInControls } from '../config/formConfig';
+import CommonForm from '../components/common-form';
+import { callLoginUserApi } from '../services/index';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 function SignIn() {
   const formData = useForm({
     defaultValues: {
-      email: "",
-      password: "",
-    },
+      email: '',
+      password: ''
+    }
   });
 
   const [error, setError] = useState(null);
@@ -25,9 +25,9 @@ function SignIn() {
         formData.reset();
         setDone(response.message);
         setError(null); // Clear error if any
-        navigate("/games");
+        navigate('/games');
       } else {
-        setError(response?.response?.data.message || "Something went wrong.");
+        setError(response?.response?.data.message || 'Something went wrong.');
       }
     } catch (e) {
       setError(e.message); // This will now show your error message
@@ -39,7 +39,7 @@ function SignIn() {
       <CommonForm
         formControls={signInControls}
         form={formData}
-        buttonText={"Sign in"}
+        buttonText={'Sign in'}
         handleSubmit={handleSubmit}
       />
       {error ? (

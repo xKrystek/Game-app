@@ -5,7 +5,7 @@ import SignIn from '../src/pages/sign-in';
 import SignUp from '../src/pages/sign-up';
 import { useForm } from 'react-hook-form';
 import CommonForm from '../src/components/common-form';
-import { signInControls } from '../src/config';
+import { signInControls } from '../src/config/formConfig';
 
 function SignInWithFakeSubmit() {
   const formData = useForm({
@@ -50,7 +50,7 @@ describe('AuthPage render check', () => {
     expect(screen.getByText(/Sign Up/i)).toBeInTheDocument();
   });
 
-  test('form resets on submit',async () => {
+  test('form resets on submit', async () => {
     render(<SignInWithFakeSubmit />);
 
     const emailInput = screen.getByLabelText(/email/i);
@@ -68,6 +68,6 @@ describe('AuthPage render check', () => {
     await waitFor(() => {
       expect(emailInput.value).toBe('');
       expect(passwordInput.value).toBe('');
-    })
+    });
   });
 });

@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from 'axios';
 
 const getBackendUrl = () => {
   if (typeof window !== 'undefined') {
@@ -9,15 +9,13 @@ const getBackendUrl = () => {
   return 'http://localhost:5000';
 };
 
+export const BACKEND_URL = getBackendUrl();
+
 export const callRegisterUserApi = async (formData) => {
   try {
-    const response = await axios.post(
-      "http://localhost:5000/api/register",
-      formData,
-      {
-        withCredentials: true,
-      }
-    );
+    const response = await axios.post(`${BACKEND_URL}/api/register`, formData, {
+      withCredentials: true
+    });
 
     return response?.data;
   } catch (e) {
@@ -26,50 +24,11 @@ export const callRegisterUserApi = async (formData) => {
   }
 };
 
-// export const callLoginUserApi = async (formData) => {
-//   try {
-//     const response = await axios.post(
-//       "http://localhost:5000/api/login",
-//       formData,
-//       {
-//         withCredentials: true,
-//       }
-//     );
-
-//     return response?.data;
-//   } catch (e) {
-//     console.log(e);
-//     return e;
-//   }
-// };
-
-// export const callUserAuthApi = async () => {
-//   try {
-//     const response = await axios.get("http://localhost:5000/api/auth", {
-//   withCredentials: true,
-//   headers: {
-//     "Cache-Control": "no-cache, no-store, must-revalidate",
-//     Pragma: "no-cache",
-//     Expires: "0",
-//   },
-// });
-
-//     return response?.data;
-//   } catch (e) {
-//     console.log(e);
-//     return e;
-//   }
-// };
-
-const BACKEND_URL = getBackendUrl();
-
 export const callLoginUserApi = async (formData) => {
   try {
-    const response = await axios.post(
-      `${BACKEND_URL}/api/login`,
-      formData,
-      { withCredentials: true }
-    );
+    const response = await axios.post(`${BACKEND_URL}/api/login`, formData, {
+      withCredentials: true
+    });
     return response?.data;
   } catch (e) {
     console.log(e);
@@ -82,10 +41,10 @@ export const callUserAuthApi = async () => {
     const response = await axios.get(`${BACKEND_URL}/api/auth`, {
       withCredentials: true,
       headers: {
-        "Cache-Control": "no-cache, no-store, must-revalidate",
-        Pragma: "no-cache",
-        Expires: "0",
-      },
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        Pragma: 'no-cache',
+        Expires: '0'
+      }
     });
     return response?.data;
   } catch (e) {
@@ -95,17 +54,19 @@ export const callUserAuthApi = async () => {
 };
 
 export const callLogoutUser = async () => {
-  try{
-    const response = await axios.post(`${BACKEND_URL}/api/logout`, {}, {
-      withCredentials: true,
-    });
-    sessionStorage.removeItem("username");
-    location.reload();
-    console.log("logged Out");
-    console.log(response, "from callLogoutUser");
-    return response?.data;
-  }  catch (e){
+  try {
+    const response = await axios.post(
+      `${BACKEND_URL}/api/logout`,
+      {},
+      {
+        withCredentials: true
+      }
+    );
+    sessionStorage.removeItem('username');
+    console.log('logged Out');
+    console.log(response, 'from callLogoutUser');
+  } catch (e) {
     console.log(e);
     return e;
   }
-}
+};
