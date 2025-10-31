@@ -18,10 +18,10 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Start full stack services (Mongo + Server + Client)
-        run: docker compose up -d
+        run: docker compose up -d --build
 
       - name: Run frontend tests inside container
-        run: docker exec client npm run test:unit -- --run
+        run: docker exec client npm test -- --run
 
       - name: Shut down all services
         if: always()

@@ -5,7 +5,7 @@ services:
     image: mongo:7
     container_name: mongo
     ports:
-      - '27017:27017'
+      - "27017:27017"
     networks:
       - firstDevOps
     healthcheck:
@@ -17,7 +17,7 @@ services:
     build: ./server
     container_name: server
     ports:
-      - '5000:5000'
+      - "5001:5000"
     depends_on:
       mongo:
         condition: service_healthy
@@ -25,14 +25,17 @@ services:
       - firstDevOps
     environment:
       - MONGODB_URL=mongodb://mongo:27017/tic-tac-toe
+      - NODE_OPTIONS=--max-old-space-size=2048
     volumes:
       - ./server:/app
       - /app/node_modules
+    mem_limit: 2g
+    memswap_limit: 2g
   client:
     build: ./client
     container_name: client
     ports:
-      - '5173:5173'
+      - "5173:5173"
     depends_on:
       - server
     networks:

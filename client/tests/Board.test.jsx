@@ -1,12 +1,13 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, test, expect, vi } from "vitest";
+import { MemoryRouter } from "react-router-dom";
 import Board from "@/src/board/Board";
 import { TaskManagerContext } from "@/src/context/taskManagerContext";
 import { callLogoutUser } from "@/src/services";
 
 // Mock callLogoutUser so it doesn't actually logout
 vi.mock("@/src/services", () => ({
-  callLogoutUser: vi.fn(),
+  callLogoutUser: vi.fn(() => Promise.resolve()),
 }));
 
 describe("Board Component", () => {
@@ -33,9 +34,11 @@ describe("Board Component", () => {
 
   function renderBoard(contextOverrides = {}) {
     return render(
-      <TaskManagerContext.Provider value={{ ...mockContext, ...contextOverrides }}>
-        <Board />
-      </TaskManagerContext.Provider>
+      <MemoryRouter>
+        <TaskManagerContext.Provider value={{ ...mockContext, ...contextOverrides }}>
+          <Board />
+        </TaskManagerContext.Provider>
+      </MemoryRouter>
     );
   }
 
