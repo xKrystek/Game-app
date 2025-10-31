@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, test, expect, vi } from "vitest";
 import { MemoryRouter } from "react-router-dom";
-import Board from "@/src/board/Board";
+import Board from "@/src/board/board";
 import { TaskManagerContext } from "@/src/context/taskManagerContext";
 import { callLogoutUser } from "@/src/services";
 

@@ -1,7 +1,7 @@
 // tests/Chat.test.jsx
 import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, test, expect, vi, beforeAll } from "vitest";
-import Chat from "@/src/chat/Chat";
+import Chat from "@/src/chat/chat";
 import { TaskManagerContext } from "@/src/context/taskManagerContext";
 
 // Mock scrollIntoView to prevent JSDOM errors
