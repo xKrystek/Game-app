@@ -16,4 +16,6 @@ COPY . .
 
 EXPOSE 5000
 
-CMD [ "npm", "run", "dev" ]
+ENV HOST_URL=server MONGODB_URL=mongodb://172.17.0.2:27017/tic-tac-toe
+
+CMD [ "npm", "run", "test" ]

@@ -13,11 +13,9 @@ const healthCheck = require('./controllers/status-check.js');
 const app = express();
 require('./database/db.js');
 
-// user.find({username: "kupa"}).then(x => console.log(x));
-
 app.use(
   cors({
-    origin: [`${process.env.HOST_URL}`, 'http://192.168.1.173:5173', 'http://client/5173'],
+    origin: [`${process.env.HOST}`, 'http://192.168.1.173:5173', 'http://client/5173'],
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true
   })

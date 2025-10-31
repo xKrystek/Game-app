@@ -16,7 +16,7 @@ describe('Server Health Check', () => {
     expect(res.status).toBe(200);
     expect(res.body).toEqual({ status: 'ok' });
   });
-});
+}, 5000);
 
 // --- REGISTER TESTS ---
 describe('User Registration', () => {
@@ -42,7 +42,7 @@ describe('User Registration', () => {
         email: 'test@test.com'
       }
     });
-  });
+  }, 5000);
 
   it('Fails when email is missing', async () => {
     const res = await request(app)
@@ -54,7 +54,7 @@ describe('User Registration', () => {
       success: false,
       message: expect.stringContaining('email')
     });
-  });
+  }, 5000);
 
   it('Fails when password is missing', async () => {
     const res = await request(app)
@@ -66,7 +66,7 @@ describe('User Registration', () => {
       success: false,
       message: expect.stringContaining('password')
     });
-  });
+  }, 5000);
 
   it('Fails when password is too short', async () => {
     const res = await request(app)
@@ -78,7 +78,7 @@ describe('User Registration', () => {
       success: false,
       message: expect.stringContaining('password')
     });
-  });
+  }, 5000);
 
   it('Fails when email format is invalid', async () => {
     const res = await request(app)
@@ -90,12 +90,16 @@ describe('User Registration', () => {
       success: false,
       message: expect.stringContaining('valid email')
     });
-  });
+  }, 5000);
 });
 
 // --- LOGIN TESTS ---
 describe('User Login', () => {
   it('Logs in successfully with valid credentials', async () => {
+    await request(app)
+      .post('/api/register')
+      .send({ name: 'test', email: 'email@email.pl', password: '123456' });
+
     const res = await request(app)
       .post('/api/login')
       .send({ email: 'email@email.pl', password: '123456' });
@@ -105,7 +109,7 @@ describe('User Login', () => {
       success: true,
       message: 'User logged in successfully'
     });
-  });
+  }, 5000);
 
   it('Fails when email does not exist', async () => {
     const res = await request(app)
@@ -117,7 +121,7 @@ describe('User Login', () => {
       success: false,
       message: 'Wrong credentials'
     });
-  });
+  }, 5000);
 
   it('Fails when password is incorrect', async () => {
     const res = await request(app)
@@ -129,7 +133,7 @@ describe('User Login', () => {
       success: false,
       message: 'Wrong credentials'
     });
-  });
+  }, 5000);
 
   it('Fails when email is invalid format', async () => {
     const res = await request(app)
@@ -141,7 +145,7 @@ describe('User Login', () => {
       success: false,
       message: '"email" must be a valid email'
     });
-  });
+  }, 5000);
 
   it('Fails when email is empty', async () => {
     const res = await request(app)
@@ -153,7 +157,7 @@ describe('User Login', () => {
       success: false,
       message: expect.stringContaining('email')
     });
-  });
+  }, 5000);
 
   it('Fails when password is empty', async () => {
     const res = await request(app)
@@ -165,5 +169,5 @@ describe('User Login', () => {
       success: false,
       message: expect.stringContaining('password')
     });
-  });
+  }, 5000);
 });

@@ -1,17 +1,28 @@
-version: '3'
+version: '3.9'
+
 services:
   mongo:
     image: mongo:7
     container_name: mongo
     ports:
-      - "27017:27017"
+      - '27017:27017'
+    networks:
+      - firstDevOps
+    healthcheck:
+      test: ['CMD', 'mongo', '--eval', "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
   server:
     build: ./server
     container_name: server
     ports:
-      - "5000:5000"
+      - '5000:5000'
     depends_on:
-      - mongo
+      mongo:
+        condition: service_healthy
+    networks:
+      - firstDevOps
     environment:
       - MONGODB_URL=mongodb://mongo:27017/tic-tac-toe
     volumes:
@@ -21,11 +32,17 @@ services:
     build: ./client
     container_name: client
     ports:
-      - "5173:5173"
+      - '5173:5173'
     depends_on:
       - server
+    networks:
+      - firstDevOps
     environment:
       - REACT_APP_API_URL=http://server:5000
     volumes:
       - ./client:/app
       - /app/node_modules
+
+networks:
+  firstDevOps:
+    driver: bridge
