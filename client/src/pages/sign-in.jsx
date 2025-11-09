@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form';
 import { signInControls } from '../config/formConfig';
-import CommonForm from '../components/common-form';
-import { callLoginUserApi } from '../services/index';
+import CommonForm from '../components/common-form/commonForm';
+import { callLoginUserApi } from '../services/apiCalls';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -14,7 +14,6 @@ function SignIn() {
   });
 
   const [error, setError] = useState(null);
-  const [done, setDone] = useState(null);
 
   const navigate = useNavigate();
 
@@ -23,7 +22,6 @@ function SignIn() {
       const response = await callLoginUserApi(getData);
       if (response?.success) {
         formData.reset();
-        setDone(response.message);
         setError(null); // Clear error if any
         navigate('/games');
       } else {
@@ -42,11 +40,7 @@ function SignIn() {
         buttonText={'Sign in'}
         handleSubmit={handleSubmit}
       />
-      {error ? (
-        <p className="text-center mt-2">{error}</p>
-      ) : (
-        done && <p className="text-center mt-2">{done}</p>
-      )}
+      {error ? <p className="text-center mt-2">{error}</p> : null}
     </div>
   );
 }

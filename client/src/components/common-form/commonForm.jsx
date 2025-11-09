@@ -28,7 +28,7 @@ function CommonForm({ formControls = [], form, buttonText, handleSubmit }) {
           </div>
         ) : null
       )}
-      <button type="submit" className="text-amber-50">
+      <button type="submit" className="text-amber-50 min-w-[7ch] w-1/2 max-h-14 justify-self-center">
         {buttonText || 'Submit'}
       </button>
     </form>

@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form';
 import { signUpControls } from '../config/formConfig';
-import CommonForm from '../components/common-form';
-import { callRegisterUserApi } from '../services/index';
+import CommonForm from '../components/common-form/commonForm';
+import { callRegisterUserApi } from '../services/apiCalls';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -15,7 +15,6 @@ function SignUp() {
   });
 
   const [error, setError] = useState(null);
-  const [done, setDone] = useState(null);
 
   const navigate = useNavigate();
 
@@ -24,7 +23,6 @@ function SignUp() {
       const response = await callRegisterUserApi(getData);
       if (response?.success) {
         formData.reset();
-        setDone(response.message);
         setError(null); // Clear error if any
         navigate('/');
       } else {
@@ -43,11 +41,7 @@ function SignUp() {
         buttonText={'Sign Up'}
         handleSubmit={handleSubmit}
       />
-      {error ? (
-        <p className="text-center mt-2">{error}</p>
-      ) : (
-        done && <p className="text-center mt-2">{done}</p>
-      )}
+      {error ? <p className="text-center mt-2">{error}</p> : null}
     </div>
   );
 }
