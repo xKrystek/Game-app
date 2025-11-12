@@ -1,9 +1,9 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { callUserAuthApi } from '../services';
+import { callUserAuthApi } from '../services/apiCalls';
 import { io } from 'socket.io-client';
-import GameCheck from '../board/game-check';
+import GameCheck from '../board/game-check/TTTGameCheck';
 import { TaskManagerContext } from './taskManagerContext';
 
 const getBackendUrl = () => {
@@ -85,6 +85,7 @@ function TaskManagerProvider({ children }) {
     const cellDiv = event.target.closest('[data-cell]');
     if (!cellDiv) return;
 
+    console.log('triggered');
     const cell = cellDiv.dataset.cell;
     if (!yourTurn || board[cell]) return;
 
@@ -103,21 +104,6 @@ function TaskManagerProvider({ children }) {
     setDisplayBtn(false);
     socketRef.current.emit('rematch', [socketId, true]);
   }
-
-  // -----------------------------
-  // 🧮 GAME CHECKER EFFECT
-  // -----------------------------
-  useEffect(() => {
-    let secondPlayer;
-    playersUsernamesList.forEach((user) =>
-      user[1] !== socketId ? (secondPlayer = user[1]) : null
-    );
-
-    if (GameCheck(board) && player && GameCheck(board) === player)
-      socketRef.current.emit('score', [socketId, yourScore + 1]);
-    else if (GameCheck(board) && player && GameCheck(board) !== player)
-      socketRef.current.emit('score', [secondPlayer, oponentScore + 1]);
-  }, [gameOver]);
 
   // -----------------------------
   // 🧠 MAIN EFFECT — AUTH + SOCKET SETUP
@@ -139,7 +125,8 @@ function TaskManagerProvider({ children }) {
         ? navigate(
             location.pathname === '/' || location.pathname === '/auth'
               ? '/games'
-              : `${location.pathname}`
+              : `${location.pathname}`,
+            { replace: false }
           )
         : navigate('/auth');
     };
@@ -155,7 +142,7 @@ function TaskManagerProvider({ children }) {
     }
 
     // 🎮 SOCKET SETUP — only on game route
-    if (location.pathname === '/tic-tac-toe' && sessionStorage.getItem('username')) {
+    if (location.pathname === '/tic-tac-toe') {
       socketRef.current = io(`${BACKEND_URL}/tic-tac-toe`);
 
       // --- CONNECT EVENT ---
@@ -217,10 +204,17 @@ function TaskManagerProvider({ children }) {
         });
       });
 
-      socketRef.current.on('score', (score) => {
-        if (score[0] === socketRef.current.id) setYourScore(score[1]);
-        else setOponentScore(score[1]);
-      });
+      socketRef.current.on("win", (score) => {
+        for(const key in score){
+          if(key === socketRef.current?.id) setYourScore(score[key]);
+        }
+      })
+
+      socketRef.current.on("lose", (score) => {
+        for(const key in score){
+          if(key !== socketRef.current?.id) setOponentScore(score[key]);
+        }
+      })
 
       socketRef.current.on('playerDisconnect', () => {
         setYourTurn(undefined);
@@ -236,32 +230,76 @@ function TaskManagerProvider({ children }) {
       });
     }
 
+    if (location.pathname === '/ships') {
+      socketRef.current = io(`${BACKEND_URL}/ships`);
+
+      setDisableChat(false);
+
+      // --- CONNECT EVENT ---
+      socketRef.current.on('connect', () => {
+        setSocketId(socketRef.current.id);
+      });
+
+      // --- LISTENERS ---
+      socketRef.current.on('listOfUsernames', (usernamesFromBackend) => {
+        setPlayersUsernamesList(usernamesFromBackend);
+      });
+
+      socketRef.current.on('send-message', (fullchat) => {
+        setChat(fullchat);
+      });
+    }
+
     // 🧹 CLEANUP
     return () => {
-      setBoard({
-        one: '',
-        two: '',
-        three: '',
-        four: '',
-        five: '',
-        six: '',
-        seven: '',
-        eight: '',
-        nine: ''
-      });
-      setYourTurn(undefined);
-      setDisableChat(false);
-      setRematch(false);
-      setRematchOponent(false);
-      setRematchYou(false);
-      setDisplayScoreBoard(false);
-      setYourScore(0);
-      setOponentScore(0);
-      setDisplayBtn(false);
-      setGameOver(false);
+      if (location.pathname === '/tic-tac-toe') {
+        setBoard({
+          one: '',
+          two: '',
+          three: '',
+          four: '',
+          five: '',
+          six: '',
+          seven: '',
+          eight: '',
+          nine: ''
+        });
+        setYourTurn(undefined);
+        setDisableChat(false);
+        setRematch(false);
+        setRematchOponent(false);
+        setRematchYou(false);
+        setDisplayScoreBoard(false);
+        setYourScore(0);
+        setOponentScore(0);
+        setDisplayBtn(false);
+        setGameOver(false);
 
-      socketRef.current?.disconnect();
-      socketRef.current = null;
+        socketRef.current.off("score");
+        socketRef.current.off("play-again");
+        socketRef.current.off("send-message");
+        socketRef.current.off("rematch");
+        socketRef.current.off("playerValues");
+        socketRef.current.off("playerDisconnect");
+        socketRef.current.off("listOfUsernames");
+        socketRef.current.off("connect");
+        socketRef.current.off("player-move");
+
+
+        socketRef.current?.disconnect();
+        socketRef.current = null;
+      }
+      if (location.pathname === '/ships') {
+        // setYourTurn(undefined);
+        // setDisableChat(false);
+        // setRematch(false);
+        // setRematchOponent(false);
+        // setRematchYou(false);
+        // setDisplayScoreBoard(false);
+        // setYourScore(0);
+        // setOponentScore(0);
+        // setDisplayBtn(false);
+      }
     };
   }, [location.pathname]);
 

@@ -42,7 +42,9 @@ function Scoreboard() {
             x[1] === socketRef.current?.id ? x[0] : null
           )}
         </div>
-        <p className="mx-2 sm:mx-3">vs</p>
+        {playersUsernamesList.length < 2 ? null : (
+          <p className="mx-2 sm:mx-3">vs</p>
+        )}
         <div id="user2">
           {playersUsernamesList?.map((x) =>
             x[1] !== socketRef.current?.id ? x[0] : null
@@ -50,13 +52,15 @@ function Scoreboard() {
         </div>
       </div>
 
-      <div
-        id="score"
-        className="grow flex items-center justify-center tracking-[0.5rem]
+      {playersUsernamesList.length < 2 ? null : (
+        <div
+          id="score"
+          className="grow flex items-center justify-center tracking-[0.5rem]
                  text-2xl sm:text-3xl md:text-5xl lg:text-6xl xl:text-7xl"
-      >
-        {yourScore}:{oponentScore}
-      </div>
+        >
+          {yourScore}:{oponentScore}
+        </div>
+      )}
 
       <div
         id="rematch-wrapper"

@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom';
 import SignIn from '../src/pages/sign-in';
 import SignUp from '../src/pages/sign-up';
 import { useForm } from 'react-hook-form';
-import CommonForm from '../src/components/common-form';
+import CommonForm from '../src/components/common-form/commonForm';
 import { signInControls } from '../src/config/formConfig';
 
 function SignInWithFakeSubmit() {

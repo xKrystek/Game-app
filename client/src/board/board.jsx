@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useContext, useEffect } from 'react';
 import { TaskManagerContext } from '../context/taskManagerContext';
-import { callLogoutUser } from '../services';
+import { callLogoutUser } from '../services/apiCalls';
 import { useNavigate } from 'react-router-dom';
 
 function Board() {
@@ -25,8 +25,8 @@ function Board() {
   const navigate = useNavigate();
 
   const handleLogoutUser = () => {
-    callLogoutUser().then(() =>navigate("/auth"));
-  }
+    callLogoutUser().then(() => navigate('/auth'));
+  };
 
   useEffect(() => {
     if (GameCheck(board) === 'O' || GameCheck(board) === 'X') {
