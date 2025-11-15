@@ -18,7 +18,6 @@ function Scoreboard() {
 
   useEffect(() => {
     if (rematchYou && rematchOponent) {
-      console.log('triggered');
       setRematch(false);
       setRematchOponent(false);
       setRematchYou(false);

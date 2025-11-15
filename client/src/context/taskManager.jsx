@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { callUserAuthApi } from '../services/apiCalls';
 import { io } from 'socket.io-client';
@@ -81,11 +81,10 @@ function TaskManagerProvider({ children }) {
   // -----------------------------
   // ⚙️ HANDLERS
   // -----------------------------
-  function handleBoardOnClick(event) {
+  const handleBoardOnClick = useCallback((event) => {
     const cellDiv = event.target.closest('[data-cell]');
     if (!cellDiv) return;
 
-    console.log('triggered');
     const cell = cellDiv.dataset.cell;
     if (!yourTurn || board[cell]) return;
 
@@ -97,13 +96,13 @@ function TaskManagerProvider({ children }) {
       !storedInfo[storedOtherSidsIndex][1][1];
 
     socketRef.current.emit('player-move', updatedBoard, storedInfo);
-  }
+  }, [board, yourTurn, player, storedInfo, storedCurrentSidsIndex, storedOtherSidsIndex])
 
-  function playAgainButton() {
+  const playAgainButton = useCallback(() => {
     socketRef.current.emit('play-again');
     setDisplayBtn(false);
     socketRef.current.emit('rematch', [socketId, true]);
-  }
+  }, [socketId])
 
   // -----------------------------
   // 🧠 MAIN EFFECT — AUTH + SOCKET SETUP
