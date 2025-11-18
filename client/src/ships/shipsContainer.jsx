@@ -1,68 +1,98 @@
-import { memo, useEffect, useState, useRef } from 'react';
-const ShipsContainer = memo(function ShipsContainer({ height = 0, width = 0 }) {
-  const [offset, setOffset] = useState({ x: 0, y: 0 });
-  const [pos, setPos] = useState({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = useState(false);
+import { memo, useEffect, useState, useRef } from "react";
+
+const ShipsContainer = memo(function ShipsContainer({ }) {
+  const [pos, setPos] = useState({
+    two: { x: 0, y: 0 },
+    three: { x: 0, y: 0 },
+    four: { x: 0, y: 0 },
+    five: { x: 0, y: 0 }
+  });
+
+  const [offset, setOffset] = useState({
+    two: { x: 0, y: 0 },
+    three: { x: 0, y: 0 },
+    four: { x: 0, y: 0 },
+    five: { x: 0, y: 0 }
+  });
+
+  const [draggingShip, setDraggingShip] = useState(null);
+  const draggedElWidth = useRef(0);
+  const draggedElHeight = useRef(0);
 
   function handleMouseDown(e) {
-    const divPos = e.target.getBoundingClientRect();
+    const ship = e.target.closest("[data-ship]").dataset.ship;
 
-    setOffset({
-      x: e.clientX - divPos.left,
-      y: e.clientY - divPos.top
-    });
-    setIsDragging(true);
+    const rect = e.target.getBoundingClientRect();
+
+    draggedElWidth.current = rect.width;
+    draggedElHeight.current = rect.height;
+
+    setOffset((prev) => ({
+      ...prev,
+      [ship]: {
+        x: e.clientX - draggedElWidth.current - rect.left,
+        y: e.clientY - draggedElHeight.current / 2 - rect.top
+      }
+    }));
+
+    setDraggingShip(ship);
   }
 
   useEffect(() => {
     function handleMouseMove(e) {
-      if (!isDragging) return;
-      setPos({
-        x: e.clientX - offset.x,
-        y: e.clientY - offset.y
-      });
-      console.log(e);
+      if (!draggingShip) return;
+
+      setPos((prev) => ({
+        ...prev,
+        [draggingShip]: {
+          x: e.clientX - offset[draggingShip].x,
+          y: e.clientY - offset[draggingShip].y
+        }
+      }));
+    }
+    function handleMouseUp(e){
+      setDraggingShip(false);
     }
 
-    function handleMouseUp() {
-      setIsDragging(false);
+    function windowPreventDefault(e){
+      e.preventDefault();
     }
 
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
+    window.addEventListener("mousedown", windowPreventDefault)
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
 
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener("mousedown", windowPreventDefault);
     };
-  }, [isDragging]);
+  }, [draggingShip, offset]);
 
   return (
     <>
-      <div className="grid gap-0.5 grid-cols-4 grid-rows-5 xl:h-[calc(65%/2)] lg:h-1/4 h-1/6 w-[calc(41px*4)] absolute"
-            style={{
-              left: `${pos.x === 0 ? "100%" : `${pos.x}px`}`,
-              top: `${pos.y === 0 ? "50%" : `${pos.y}px`}`,
-              cursor: "grab",
-            }}
-            onMouseDown={handleMouseDown}
-      >
-        {[5].map((value, index) => (
-          <div
-            key={index}
-            className={`col-start-${
-              index + 1
-            } col-span-1 border-2 border-white`}
-            style={{
-              gridRowEnd: `span ${value}`,
-            }}
-          >
-            {value}
-          </div>
-        ))}
-      </div>
+      {["two", "three", "four", "five"].map((value, index) => (
+        <div
+          key={value}
+          className="xl:h-[calc(65%/2)] lg:h-1/4 h-1/6 w-[41px] 
+                     border border-amber-100 absolute -translate-y-1/2 
+                     top-1/2 left-full -translate-x-full"
+          style={{
+            left: pos[value].x === 0 ? "100%" : `${pos[value].x}px`,
+            top: pos[value].y === 0 ? "50%" : `${pos[value].y}px`,
+            cursor: "grab",
+            height: `calc(65%*${index + 2}/10)`
+          }}
+          onMouseDown={handleMouseDown}
+          data-ship={value}
+        >
+          {value}
+        </div>
+      ))}
     </>
   );
 });
 
 export default ShipsContainer;
+
+

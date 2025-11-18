@@ -11,9 +11,9 @@ function ShipsBoard() {
     callLogoutUser().then(() => navigate('/auth'));
   };
 
-  const [higlight, setHighlight] = useState(false);
   const [BOARD_WIDTH, setBOARD_WIDTH] = useState(0);
   const [BOARD_HEIGHT, setBOARD_HEIGHT] = useState(0);
+
   const BoardRef = useRef(null);
 
   useEffect(() => {
@@ -32,22 +32,22 @@ function ShipsBoard() {
       >
         LogOut
       </button>
+
       <div
         className="ships grid gap-0.5 grid-cols-10 grid-rows-10 xl:h-[65%] lg:h-1/2 h-1/3 aspect-square absolute top-1/2 right-1/2 -translate-y-1/2 translate-x-1/2"
         ref={BoardRef}
       >
-        {wordsList.map((value, index) => (
-          <div
-            data-cell={`${value}`}
-            className={`border-2 border-white w-full h-full ${value} ${
-              higlight ? 'bg-amber-100 opacity-90' : null
-            }`}
-            key={index}
-            onDragEnter={() => setHighlight(true)}
-            onDragLeave={() => setHighlight(false)}
-          ></div>
-        ))}
+        {wordsList.map((value, index) => {
+          return (
+            <div
+              className="w-full aspect-square border border-white"
+              data-cell={value}
+              key={index}
+            ></div>
+          );
+        })}
       </div>
+
       <ShipsContainer height={BOARD_HEIGHT} width={BOARD_WIDTH} />
     </>
   );
