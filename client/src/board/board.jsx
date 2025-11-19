@@ -3,6 +3,7 @@ import { useContext, useEffect } from 'react';
 import { TaskManagerContext } from '../context/taskManagerContext';
 import { callLogoutUser } from '../services/apiCalls';
 import { useNavigate } from 'react-router-dom';
+import numberWords from '../scripts/wordListGenerator';
 
 function Board() {
   const {
@@ -65,60 +66,9 @@ function Board() {
           >
             LogOut
           </button>
-          <div
-            data-cell="one"
-            className="border-solid border-3 border-white place-content-center"
-          >
-            {board.one}
-          </div>
-          <div
-            data-cell="two"
-            className="border-solid border-3 border-white place-content-center"
-          >
-            {board.two}
-          </div>
-          <div
-            data-cell="three"
-            className="border-solid border-3 border-white place-content-center"
-          >
-            {board.three}
-          </div>
-          <div
-            data-cell="four"
-            className="border-solid border-3 border-white place-content-center"
-          >
-            {board.four}
-          </div>
-          <div
-            data-cell="five"
-            className="border-solid border-3 border-white place-content-center"
-          >
-            {board.five}
-          </div>
-          <div
-            data-cell="six"
-            className="border-solid border-3 border-white place-content-center"
-          >
-            {board.six}
-          </div>
-          <div
-            data-cell="seven"
-            className="border-solid border-3 border-white place-content-center"
-          >
-            {board.seven}
-          </div>
-          <div
-            data-cell="eight"
-            className="border-solid border-3 border-white place-content-center"
-          >
-            {board.eight}
-          </div>
-          <div
-            data-cell="nine"
-            className="border-solid border-3 border-white place-content-center"
-          >
-            {board.nine}
-          </div>
+          {numberWords(9).map((value, index) => {
+            return <div className='border border-white place-content-center' key={index} data-cell={`${value}`}>{board[value]}</div>
+          })}
           {gameOver ? (
             <p className="animation1 text-[2rem] 2xl:text-[1.5vw] xl:text-[2vw] translate-x-1/2 translate-y-1/2 top-[15%] right-[51%] fixed">
               {GameCheck(board) === player ? 'You won' : 'You lost'}
