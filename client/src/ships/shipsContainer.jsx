@@ -1,6 +1,6 @@
-import { memo, useEffect, useState, useRef } from "react";
+import { memo, useEffect, useState, useRef } from 'react';
 
-const ShipsContainer = memo(function ShipsContainer({ }) {
+const ShipsContainer = memo(function ShipsContainer({}) {
   const [pos, setPos] = useState({
     two: { x: 0, y: 0 },
     three: { x: 0, y: 0 },
@@ -20,7 +20,7 @@ const ShipsContainer = memo(function ShipsContainer({ }) {
   const draggedElHeight = useRef(0);
 
   function handleMouseDown(e) {
-    const ship = e.target.closest("[data-ship]").dataset.ship;
+    const ship = e.target.closest('[data-ship]').dataset.ship;
 
     const rect = e.target.getBoundingClientRect();
 
@@ -38,9 +38,17 @@ const ShipsContainer = memo(function ShipsContainer({ }) {
     setDraggingShip(ship);
   }
 
+  function rotateShip(e) {
+    e.target.style.width = `${draggedElHeight.current}px`;
+    e.target.style.height = `${draggedElWidth.current}px`;
+  }
+
   useEffect(() => {
     function handleMouseMove(e) {
       if (!draggingShip) return;
+
+      // const resultX = (window.innerWidth / (e.clientX - offset[draggingShip].x)*100).toFixed(2);
+      // const resultY = ((window.innerHeight / (e.clientY - offset[draggingShip].y)*100)).toFixed(2);
 
       setPos((prev) => ({
         ...prev,
@@ -50,40 +58,41 @@ const ShipsContainer = memo(function ShipsContainer({ }) {
         }
       }));
     }
-    function handleMouseUp(e){
+    function handleMouseUp() {
       setDraggingShip(false);
     }
 
-    function windowPreventDefault(e){
+    function windowPreventDefault(e) {
       e.preventDefault();
     }
 
-    window.addEventListener("mousedown", windowPreventDefault)
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseup", handleMouseUp);
+    window.addEventListener('mousedown', windowPreventDefault);
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
 
     return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
-      window.removeEventListener("mousedown", windowPreventDefault);
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('mousedown', windowPreventDefault);
     };
   }, [draggingShip, offset]);
 
   return (
     <>
-      {["two", "three", "four", "five"].map((value, index) => (
+      {['two', 'three', 'four', 'five'].map((value, index) => (
         <div
           key={value}
-          className="xl:h-[calc(65%/2)] lg:h-1/4 h-1/6 w-[41px] 
+          className="xl:h-[calc(65%/2)] lg:h-1/4 h-1/6 w-[53px] 
                      border border-amber-100 absolute -translate-y-1/2 
                      top-1/2 left-full -translate-x-full"
           style={{
-            left: pos[value].x === 0 ? "100%" : `${pos[value].x}px`,
-            top: pos[value].y === 0 ? "50%" : `${pos[value].y}px`,
-            cursor: "grab",
+            left: pos[value].x === 0 ? '100%' : `${pos[value].x}px`,
+            top: pos[value].y === 0 ? '50%' : `${pos[value].y}px`,
+            cursor: 'grab',
             height: `calc(65%*${index + 2}/10)`
           }}
           onMouseDown={handleMouseDown}
+          onDoubleClick={rotateShip}
           data-ship={value}
         >
           {value}
@@ -94,5 +103,3 @@ const ShipsContainer = memo(function ShipsContainer({ }) {
 });
 
 export default ShipsContainer;
-
-
