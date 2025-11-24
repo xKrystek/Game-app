@@ -30,5 +30,5 @@ function numberWords(limit = 100) {
   return words;
 }
 
-export default numberWords(100);
+export default numberWords;
 // console.log(numbers);

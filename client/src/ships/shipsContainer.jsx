@@ -1,18 +1,22 @@
 import { memo, useEffect, useState, useRef } from 'react';
 
-const ShipsContainer = memo(function ShipsContainer({}) {
+const ShipsContainer = memo(function ShipsContainer({ onDropShip }) {
   const [pos, setPos] = useState({
+    one: { x: 0, y: 0 },
     two: { x: 0, y: 0 },
     three: { x: 0, y: 0 },
     four: { x: 0, y: 0 },
-    five: { x: 0, y: 0 }
+    five: { x: 0, y: 0 },
+    six: { x: 0, y: 0 }
   });
 
   const [offset, setOffset] = useState({
+    one: { x: 0, y: 0 },
     two: { x: 0, y: 0 },
     three: { x: 0, y: 0 },
     four: { x: 0, y: 0 },
-    five: { x: 0, y: 0 }
+    five: { x: 0, y: 0 },
+    six: { x: 0, y: 0 }
   });
 
   const [draggingShip, setDraggingShip] = useState(null);
@@ -47,19 +51,43 @@ const ShipsContainer = memo(function ShipsContainer({}) {
     function handleMouseMove(e) {
       if (!draggingShip) return;
 
-      // const resultX = (window.innerWidth / (e.clientX - offset[draggingShip].x)*100).toFixed(2);
-      // const resultY = ((window.innerHeight / (e.clientY - offset[draggingShip].y)*100)).toFixed(2);
+      const resultX = (
+        ((e.clientX - offset[draggingShip].x) / window.innerWidth) *
+        100
+      ).toFixed(2);
+      const resultY = (
+        ((e.clientY - offset[draggingShip].y) / window.innerHeight) *
+        100
+      ).toFixed(2);
+
+      // console.log(resultX, 'resultx');
+      // console.log(resultY, 'resultY');
 
       setPos((prev) => ({
         ...prev,
         [draggingShip]: {
-          x: e.clientX - offset[draggingShip].x,
-          y: e.clientY - offset[draggingShip].y
+          x: resultX,
+          y: resultY
         }
       }));
     }
-    function handleMouseUp() {
+    function handleMouseUp(e) {
       setDraggingShip(false);
+      const { left, top, right, bottom, width, height } =
+        e.target.getBoundingClientRect();
+      const shipBordersCoordinates = {
+        left: left,
+        top: top,
+        right: window.innerWidth - right,
+        bottom: window.innerHeight - bottom,
+        center: { x: left + width / 2, y: top + height / 2 }
+      };
+      console.log(shipBordersCoordinates);
+      // console.log(shipBordersCoordinates.right, "right cursor");
+      // console.log(shipBordersCoordinates.bottom, "bottom cursor")
+      // console.log(shipBordersCoordinates.left, "left cursor")
+      // console.log(shipBordersCoordinates.top, "top cursor")
+      onDropShip(shipBordersCoordinates, e.clientX, e.clientY);
     }
 
     function windowPreventDefault(e) {
@@ -79,17 +107,16 @@ const ShipsContainer = memo(function ShipsContainer({}) {
 
   return (
     <>
-      {['two', 'three', 'four', 'five'].map((value, index) => (
+      {['one', 'two', 'three', 'four', 'five', 'six'].map((value, index) => (
         <div
           key={value}
-          className="xl:h-[calc(65%/2)] lg:h-1/4 h-1/6 w-[53px] 
-                     border border-amber-100 absolute -translate-y-1/2 
+          className="w-[calc(55%/20)] border-8 border-amber-100 absolute -translate-y-1/2 
                      top-1/2 left-full -translate-x-full"
           style={{
-            left: pos[value].x === 0 ? '100%' : `${pos[value].x}px`,
-            top: pos[value].y === 0 ? '50%' : `${pos[value].y}px`,
+            left: pos[value].x === 0 ? '100%' : `${pos[value].x}%`,
+            top: pos[value].y === 0 ? '50%' : `${pos[value].y}%`,
             cursor: 'grab',
-            height: `calc(65%*${index + 2}/10)`
+            height: `calc(64%*${index + 1}/10)`
           }}
           onMouseDown={handleMouseDown}
           onDoubleClick={rotateShip}
