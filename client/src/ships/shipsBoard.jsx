@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import wordsList from '../scripts/wordListGenerator.js';
 import { callLogoutUser } from '../services/apiCalls.js';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import ShipsContainer from './shipsContainer.jsx';
 
 function ShipsBoard() {
@@ -11,13 +11,24 @@ function ShipsBoard() {
     callLogoutUser().then(() => navigate('/auth'));
   };
 
+  const [highlighted, setHighlighted] = useState({
+    '1': [],
+    '2': [],
+    '3': [],
+    '4': [],
+    '5': [],
+    '6': [],
+  });
+
   const BoardRef = useRef(null);
 
-  function onDropShip(draggedShip, mouseX, mouseY) {
+  function onDropShip(draggedShip, shipSize, orientation, mouseX, mouseY) {
     const ShipsBoardStats = BoardRef.current.getBoundingClientRect();
 
     const cell = Math.round(ShipsBoardStats.height / 10);
-    console.log(cell, 'cell size');
+    // console.log(cell, 'cell size');
+
+    // console.log(parseInt(shipSize), "ship size");
 
     // console.log(window.innerWidth - ShipsBoardStats.right, 'right');
     // console.log(window.innerHeight - ShipsBoardStats.top, 'top');
@@ -36,14 +47,39 @@ function ShipsBoard() {
       const cellUnderCursorY =
         (mouseX - ShipsBoardStats.left) / cell % 10;
 
-      console.log(cellUnderCursorX, 'row under the cursor');
-      console.log(cellUnderCursorY, 'column under the cursor');
-      console.log((draggedShip.left - ShipsBoardStats.left) / cell % 10, "left border of ship from left side of board")
-      console.log(Math.round((draggedShip.left - ShipsBoardStats.left) / cell % 10), "rounded to snap")
-      console.log((draggedShip.top - ShipsBoardStats.top) / cell % 10, "top border of ship from top side of board")
-      console.log(Math.round((draggedShip.top - ShipsBoardStats.top) / cell % 10), "rounded to snap")
-      console.log((draggedShip.center.x - ShipsBoardStats.left) / cell % 10, "center x cord");
-      console.log((draggedShip.center.y - ShipsBoardStats.top) / cell % 10, "center y cord");
+      const shipColumn = Math.round((draggedShip.top - ShipsBoardStats.top) / cell % 10);
+      const shipTopRow = Math.round((draggedShip.left - ShipsBoardStats.left) / cell % 10);
+
+      // console.log(cellUnderCursorX, 'row under the cursor');
+      // console.log(cellUnderCursorY, 'column under the cursor');
+      console.log((draggedShip.left - ShipsBoardStats.left) / cell % 10, "left border of ship from left side of board");
+      console.log(Math.round((draggedShip.left - ShipsBoardStats.left) / cell % 10), "rounded to snap X");
+      console.log((draggedShip.top - ShipsBoardStats.top) / cell % 10, "top border of ship from top side of board");
+      console.log(Math.round((draggedShip.top - ShipsBoardStats.top) / cell % 10), "rounded to snap Y");
+      // console.log((draggedShip.center.x - ShipsBoardStats.left) / cell % 10, "center x cord");
+      // console.log((draggedShip.center.y - ShipsBoardStats.top) / cell % 10, "center y cord");
+    
+      const shipPlacement = () => {
+        const shipPlacementArray = {[shipSize]: []};
+
+        console.log(shipPlacementArray, "array");
+
+        if(orientation[shipSize] === "vertical"){
+
+          for(let i = 0; i < parseInt(shipSize); i++){
+            shipPlacementArray[shipSize].push(shipTopRow + ((shipColumn + i) * 10 ));
+          }
+  
+        } else {
+
+          for(let i = 0; i < parseInt(shipSize); i++){
+            shipPlacementArray[shipSize].push(shipTopRow + i + shipColumn * 10);
+          }
+        }
+        return shipPlacementArray;
+      }
+      setHighlighted(prev => ({...prev, ...shipPlacement()}));
+      // console.log("highlighted placement ship", shipPlacement());
     }
   }
 
@@ -61,11 +97,16 @@ function ShipsBoard() {
         ref={BoardRef}
       >
         {wordsList(100).map((value, index) => {
+
+          const indexesOfEachShip = Object.values(highlighted);
+          const isHighlighted = indexesOfEachShip.some(arr => arr.includes(index));
+
           return (
             <div
               className="w-full aspect-square border border-white"
               data-cell={value}
               key={index}
+              style={{backgroundColor: isHighlighted ? "lightsalmon" : null}}
             ></div>
           );
         })}
