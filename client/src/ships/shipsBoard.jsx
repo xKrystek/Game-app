@@ -1,7 +1,6 @@
 import { useNavigate } from 'react-router-dom';
-import wordsList from '../scripts/wordListGenerator.js';
 import { callLogoutUser } from '../services/apiCalls.js';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import ShipsContainer from './shipsContainer.jsx';
 
 function ShipsBoard() {
@@ -20,7 +19,28 @@ function ShipsBoard() {
     '6': [],
   });
 
+  const [HEIGHT, setHEIGHT] = useState(0);
+  const [WIDTH, setWIDTH] = useState(0);
+
   const BoardRef = useRef(null);
+  const cellsRef = useRef({});
+
+  useEffect(() => {
+  const refs = cellsRef.current;
+  Object.keys(refs).forEach((key) => {
+    const el = refs[key];
+    if (el) {
+      refs[key] = el.getBoundingClientRect();
+    }
+
+    const board = BoardRef.current.getBoundingClientRect();
+
+    setHEIGHT(board.height);
+    setWIDTH(board.width);
+  });
+
+
+}, []);
 
   function onDropShip(draggedShip, shipSize, orientation, mouseX, mouseY) {
     const ShipsBoardStats = BoardRef.current.getBoundingClientRect();
@@ -96,10 +116,11 @@ function ShipsBoard() {
         className="ships grid gap-0.5 grid-cols-10 grid-rows-10 xl:h-[65%] lg:h-1/2 h-1/3 aspect-square absolute top-1/2 right-1/2 -translate-y-1/2 translate-x-1/2"
         ref={BoardRef}
       >
-        {wordsList(100).map((value, index) => {
+        {Array.from({length: 100},(_, index) => index).map((value, index) => {
 
           const indexesOfEachShip = Object.values(highlighted);
           const isHighlighted = indexesOfEachShip.some(arr => arr.includes(index));
+
 
           return (
             <div
@@ -107,12 +128,15 @@ function ShipsBoard() {
               data-cell={value}
               key={index}
               style={{backgroundColor: isHighlighted ? "lightsalmon" : null}}
+              ref={(el) => {
+                cellsRef.current[index] = el;
+              }}
             ></div>
           );
         })}
       </div>
 
-      <ShipsContainer onDropShip={onDropShip} />
+      <ShipsContainer onDropShip={onDropShip} WIDTH={WIDTH} HEIGHT={HEIGHT} cellsPositions={cellsRef.current} />
     </>
   );
 }

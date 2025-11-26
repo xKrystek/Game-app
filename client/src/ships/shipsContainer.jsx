@@ -1,6 +1,6 @@
 import { memo, useEffect, useState, useRef } from 'react';
 
-const ShipsContainer = memo(function ShipsContainer({ onDropShip }) {
+const ShipsContainer = memo(function ShipsContainer({ onDropShip, WIDTH, HEIGHT, cellsPositions }) {
   const [pos, setPos] = useState({
     1: { x: 0, y: 0 },
     2: { x: 0, y: 0 },
@@ -18,6 +18,8 @@ const ShipsContainer = memo(function ShipsContainer({ onDropShip }) {
     5: { x: 0, y: 0 },
     6: { x: 0, y: 0 }
   });
+
+  console.log(HEIGHT, "height");
 
   const [draggingShip, setDraggingShip] = useState(null);
   const draggedElWidth = useRef(0);
@@ -132,7 +134,7 @@ const ShipsContainer = memo(function ShipsContainer({ onDropShip }) {
 
   return (
     <>
-      {['1', '2', '3', '4', '5', '6'].map((value, index) => (
+      {['1', '2', '3', '4', '5', '6'].map((value) => (
         <div
           key={value}
           className="w-[calc(55%/20)] border border-amber-100 absolute -translate-y-1/2 
@@ -141,7 +143,8 @@ const ShipsContainer = memo(function ShipsContainer({ onDropShip }) {
             left: pos[value].x === 0 ? '100%' : `${pos[value].x}%`,
             top: pos[value].y === 0 ? '50%' : `${pos[value].y}%`,
             cursor: 'grab',
-            height: `calc(64%*${index + 1}/10)`
+            height: `${(HEIGHT * (parseInt(value)) / 10) - 2 + ((parseInt(value) - 1) * 2 / 9) - 5}px`,
+            width: `${(WIDTH * (parseInt(value)) / 10) - 2 + ((parseInt(value) - 1) * 2 / 9) - 5}px}`
           }}
           onMouseDown={handleMouseDown}
           onDoubleClick={rotateShip}
