@@ -1,6 +1,11 @@
 import { memo, useEffect, useState, useRef } from 'react';
 
-const ShipsContainer = memo(function ShipsContainer({ onDropShip, WIDTH, HEIGHT, cellsPositions }) {
+const ShipsContainer = memo(function ShipsContainer({
+  onDropShip,
+  WIDTH,
+  HEIGHT,
+  cellsPositions
+}) {
   const [pos, setPos] = useState({
     1: { x: 0, y: 0 },
     2: { x: 0, y: 0 },
@@ -19,9 +24,10 @@ const ShipsContainer = memo(function ShipsContainer({ onDropShip, WIDTH, HEIGHT,
     6: { x: 0, y: 0 }
   });
 
-  console.log(HEIGHT, "height");
+  console.log(HEIGHT, 'height');
 
   const [draggingShip, setDraggingShip] = useState(null);
+  const [draggingShip2, setDraggingShip2] = useState(null);
   const draggedElWidth = useRef(0);
   const draggedElHeight = useRef(0);
   const [orientation, setOrientation] = useState({
@@ -32,6 +38,9 @@ const ShipsContainer = memo(function ShipsContainer({ onDropShip, WIDTH, HEIGHT,
     5: 'vertical',
     6: 'vertical'
   });
+
+  const ETarget = useRef(null);
+  const RECT = useRef(null);
 
   function handleMouseDown(e) {
     const ship = e.target.closest('[data-ship]').dataset.ship;
@@ -50,17 +59,68 @@ const ShipsContainer = memo(function ShipsContainer({ onDropShip, WIDTH, HEIGHT,
     }));
 
     setDraggingShip(ship);
+    setDraggingShip2(ship);
   }
 
   function rotateShip(e) {
+    ETarget.current = e;
     e.target.style.width = `${draggedElHeight.current}px`;
     e.target.style.height = `${draggedElWidth.current}px`;
+    const rect = e.target.getBoundingClientRect();
+    RECT.current = rect;
     const ship = e.target.closest('[data-ship]').dataset.ship;
     setOrientation((prev) => ({
       ...prev,
       [ship]: orientation[ship] === 'vertical' ? 'horizontal' : 'vertical'
     }));
   }
+
+  useEffect(() => {
+    const e = ETarget.current;
+    const rect = RECT.current;
+
+    if(!e) return;
+
+    setOffset((prev) => ({
+      ...prev,
+      [draggingShip2]: {
+        x: e.clientX - draggedElWidth.current - rect.left,
+        y: e.clientY - draggedElHeight.current / 2 - rect.top
+      }
+    }));
+
+    const resultX = (
+      ((e.clientX - offset[draggingShip2].x) / window.innerWidth) *
+      100
+    ).toFixed(2);
+    const resultY = (
+      ((e.clientY - offset[draggingShip2].y) / window.innerHeight) *
+      100
+    ).toFixed(2);
+
+    setPos((prev) => ({
+      ...prev,
+      [draggingShip2]: {
+        x: resultX,
+        y: resultY
+      }
+    }));
+
+    const shipBordersCoordinates = {
+      left: rect.left,
+      top: rect.top,
+      right: window.innerWidth - rect.right,
+      bottom: window.innerHeight - rect.bottom,
+      center: { x: rect.tleft + rect.width / 2, y: rect.top + rect.height / 2 }
+    };
+    onDropShip(
+      shipBordersCoordinates,
+      draggingShip2,
+      orientation,
+      e.clientX,
+      e.clientY
+    );
+  }, [orientation]);
 
   useEffect(() => {
     function handleMouseMove(e) {
@@ -143,8 +203,18 @@ const ShipsContainer = memo(function ShipsContainer({ onDropShip, WIDTH, HEIGHT,
             left: pos[value].x === 0 ? '100%' : `${pos[value].x}%`,
             top: pos[value].y === 0 ? '50%' : `${pos[value].y}%`,
             cursor: 'grab',
-            height: `${(HEIGHT * (parseInt(value)) / 10) - 2 + ((parseInt(value) - 1) * 2 / 9) - 5}px`,
-            width: `${(WIDTH * (parseInt(value)) / 10) - 2 + ((parseInt(value) - 1) * 2 / 9) - 5}px}`
+            height: `${
+              (HEIGHT * parseInt(value)) / 10 -
+              2 +
+              ((parseInt(value) - 1) * 2) / 9 -
+              5
+            }px`,
+            width: `${
+              (WIDTH * parseInt(value)) / 10 -
+              2 +
+              ((parseInt(value) - 1) * 2) / 9 -
+              5
+            }px}`
           }}
           onMouseDown={handleMouseDown}
           onDoubleClick={rotateShip}
