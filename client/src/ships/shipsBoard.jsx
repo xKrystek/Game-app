@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { callLogoutUser } from '../services/apiCalls.js';
-import { useEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import ShipsContainer from './shipsContainer.jsx';
 
 function ShipsBoard() {
@@ -22,84 +22,69 @@ function ShipsBoard() {
   const [HEIGHT, setHEIGHT] = useState(0);
   const [WIDTH, setWIDTH] = useState(0);
 
+  // DOM nodes
   const BoardRef = useRef(null);
   const cellsRef = useRef({});
+  const [cellsPositions, setCellsPositions] = useState({});
 
-  useEffect(() => {
-  const refs = cellsRef.current;
-  Object.keys(refs).forEach((key) => {
-    const el = refs[key];
-    if (el) {
-      refs[key] = el.getBoundingClientRect();
+  // DOMRects
+  const cellRects = useRef({});
+
+  /** 
+   * Measure cells & board immediately after mount and before paint 
+   * (critical for correct getBoundingClientRect)
+   */
+  useLayoutEffect(() => {
+    const nodes = cellsRef.current;
+
+    for (let i = 0; i < 100; i++) {
+      const el = nodes[i];
+      if (el) {
+        setCellsPositions((prev) => ({...prev, [i]: el.getBoundingClientRect()}))
+      }
     }
 
-    const board = BoardRef.current.getBoundingClientRect();
-
-    setHEIGHT(board.height);
-    setWIDTH(board.width);
-  });
-
-
-}, []);
+    if (BoardRef.current) {
+      const board = BoardRef.current.getBoundingClientRect();
+      setHEIGHT(board.height);
+      setWIDTH(board.width);
+    }
+  }, []);
 
   function onDropShip(draggedShip, shipSize, orientation, mouseX, mouseY) {
     const ShipsBoardStats = BoardRef.current.getBoundingClientRect();
+    const cellSize = ShipsBoardStats.height / 10;
 
-    const cell = Math.round(ShipsBoardStats.height / 10);
-    // console.log(cell, 'cell size');
+    console.log(orientation, "orientation from shipsBoard")
 
-    // console.log(parseInt(shipSize), "ship size");
-
-    // console.log(window.innerWidth - ShipsBoardStats.right, 'right');
-    // console.log(window.innerHeight - ShipsBoardStats.top, 'top');
-    // console.log(ShipsBoardStats.left, 'left');
-    // console.log(ShipsBoardStats.right, 'right');
-    //check if cursor is inside the shipsBoard
+    // is cursor inside the board?
     if (
       window.innerWidth - ShipsBoardStats.right < draggedShip.right &&
       ShipsBoardStats.left < draggedShip.left &&
       ShipsBoardStats.top < draggedShip.top &&
       window.innerHeight - ShipsBoardStats.bottom < draggedShip.bottom
     ) {
-      // Row of the cell within cursor underneath it
-      const cellUnderCursorX =
-        (mouseY - ShipsBoardStats.top) / cell % 10;
-      const cellUnderCursorY =
-        (mouseX - ShipsBoardStats.left) / cell % 10;
+      const shipColumn = Math.round((draggedShip.top - ShipsBoardStats.top) / cellSize % 10);
+      const shipTopRow = Math.round((draggedShip.left - ShipsBoardStats.left) / cellSize % 10);
 
-      const shipColumn = Math.round((draggedShip.top - ShipsBoardStats.top) / cell % 10);
-      const shipTopRow = Math.round((draggedShip.left - ShipsBoardStats.left) / cell % 10);
-
-      // console.log(cellUnderCursorX, 'row under the cursor');
-      // console.log(cellUnderCursorY, 'column under the cursor');
-      console.log((draggedShip.left - ShipsBoardStats.left) / cell % 10, "left border of ship from left side of board");
-      console.log(Math.round((draggedShip.left - ShipsBoardStats.left) / cell % 10), "rounded to snap X");
-      console.log((draggedShip.top - ShipsBoardStats.top) / cell % 10, "top border of ship from top side of board");
-      console.log(Math.round((draggedShip.top - ShipsBoardStats.top) / cell % 10), "rounded to snap Y");
-      // console.log((draggedShip.center.x - ShipsBoardStats.left) / cell % 10, "center x cord");
-      // console.log((draggedShip.center.y - ShipsBoardStats.top) / cell % 10, "center y cord");
-    
       const shipPlacement = () => {
-        const shipPlacementArray = {[shipSize]: []};
+        const shipPlacementArray = { [shipSize]: [] };
+        const length = parseInt(shipSize);
 
-        console.log(shipPlacementArray, "array");
-
-        if(orientation[shipSize] === "vertical"){
-
-          for(let i = 0; i < parseInt(shipSize); i++){
-            shipPlacementArray[shipSize].push(shipTopRow + ((shipColumn + i) * 10 ));
+        if (orientation[shipSize] === 'vertical') {
+          for (let i = 0; i < length; i++) {
+            shipPlacementArray[shipSize].push(shipTopRow + ((shipColumn + i) * 10));
           }
-  
         } else {
-
-          for(let i = 0; i < parseInt(shipSize); i++){
+          for (let i = 0; i < length; i++) {
             shipPlacementArray[shipSize].push(shipTopRow + i + shipColumn * 10);
           }
         }
+
         return shipPlacementArray;
-      }
-      setHighlighted(prev => ({...prev, ...shipPlacement()}));
-      // console.log("highlighted placement ship", shipPlacement());
+      };
+
+      setHighlighted(prev => ({ ...prev, ...shipPlacement() }));
     }
   }
 
@@ -116,27 +101,31 @@ function ShipsBoard() {
         className="ships grid gap-0.5 grid-cols-10 grid-rows-10 xl:h-[65%] lg:h-1/2 h-1/3 aspect-square absolute top-1/2 right-1/2 -translate-y-1/2 translate-x-1/2"
         ref={BoardRef}
       >
-        {Array.from({length: 100},(_, index) => index).map((value, index) => {
-
-          const indexesOfEachShip = Object.values(highlighted);
-          const isHighlighted = indexesOfEachShip.some(arr => arr.includes(index));
-
+        {Array.from({ length: 100 }).map((_, index) => {
+          const highlightedCells = Object.values(highlighted);
+          const isHighlighted = highlightedCells.some(arr => arr.includes(index));
 
           return (
             <div
-              className="w-full aspect-square border border-white"
-              data-cell={value}
               key={index}
-              style={{backgroundColor: isHighlighted ? "lightsalmon" : null}}
-              ref={(el) => {
-                cellsRef.current[index] = el;
+              data-cell={index}
+              className="w-full aspect-square border border-white"
+              style={{ backgroundColor: isHighlighted ? 'lightsalmon' : null }}
+              ref={el => {
+                if (el) cellsRef.current[index] = el;
               }}
-            ></div>
+            />
           );
         })}
       </div>
 
-      <ShipsContainer onDropShip={onDropShip} WIDTH={WIDTH} HEIGHT={HEIGHT} cellsPositions={cellsRef.current} />
+      <ShipsContainer
+        onDropShip={onDropShip}
+        WIDTH={WIDTH}
+        HEIGHT={HEIGHT}
+        cellsPositions={cellsPositions}
+        shipPlacement={highlighted}
+      />
     </>
   );
 }

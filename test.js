@@ -1,1 +1,1 @@
-console.log(parseInt("0xF"));
+console.log(2 + 2 / 2);

@@ -1,11 +1,14 @@
-import { memo, useEffect, useState, useRef } from 'react';
+import { memo, useEffect, useState, useRef, useLayoutEffect } from 'react';
 
 const ShipsContainer = memo(function ShipsContainer({
   onDropShip,
   WIDTH,
   HEIGHT,
-  cellsPositions
+  cellsPositions,
+  shipPlacement
 }) {
+
+  // console.log(shipPlacement, "ship placement");
   const [pos, setPos] = useState({
     1: { x: 0, y: 0 },
     2: { x: 0, y: 0 },
@@ -24,8 +27,7 @@ const ShipsContainer = memo(function ShipsContainer({
     6: { x: 0, y: 0 }
   });
 
-  console.log(HEIGHT, 'height');
-
+  const [center, setCenter] = useState(null);
   const [draggingShip, setDraggingShip] = useState(null);
   const [draggingShip2, setDraggingShip2] = useState(null);
   const draggedElWidth = useRef(0);
@@ -53,8 +55,8 @@ const ShipsContainer = memo(function ShipsContainer({
     setOffset((prev) => ({
       ...prev,
       [ship]: {
-        x: e.clientX - draggedElWidth.current - rect.left,
-        y: e.clientY - draggedElHeight.current / 2 - rect.top
+        x: e.clientX - rect.right,
+        y: e.clientY - rect.top
       }
     }));
 
@@ -66,68 +68,48 @@ const ShipsContainer = memo(function ShipsContainer({
     ETarget.current = e;
     e.target.style.width = `${draggedElHeight.current}px`;
     e.target.style.height = `${draggedElWidth.current}px`;
-    const rect = e.target.getBoundingClientRect();
-    RECT.current = rect;
+    const rectForSetPosition = e.target.getBoundingClientRect();
     const ship = e.target.closest('[data-ship]').dataset.ship;
+    
+    setPos((prev) => ({
+      ...prev,
+      [draggingShip2]: {
+        x: (((window.innerWidth - center.x - rectForSetPosition.width / 2) / window.innerWidth) * 100).toFixed(2),
+        y: (((center.y - (rectForSetPosition.height / 2)) / window.innerHeight) * 100).toFixed(2)
+      }
+    }));
+
+
     setOrientation((prev) => ({
       ...prev,
       [ship]: orientation[ship] === 'vertical' ? 'horizontal' : 'vertical'
     }));
   }
 
-  useEffect(() => {
-    const e = ETarget.current;
-    const rect = RECT.current;
+  useLayoutEffect(() => {
+  
+    if(!ETarget.current) return;
+    
+    const rect = ETarget.current.target.getBoundingClientRect();
 
-    if(!e) return;
+    const ShipCoordinates = {
+        left: rect.left,
+        top: rect.top,
+        right: window.innerWidth - rect.right,
+        bottom: window.innerHeight - rect.bottom,
+        center: { x: center.x, y: center.y }
+    }
 
-    setOffset((prev) => ({
-      ...prev,
-      [draggingShip2]: {
-        x: e.clientX - draggedElWidth.current - rect.left,
-        y: e.clientY - draggedElHeight.current / 2 - rect.top
-      }
-    }));
-
-    const resultX = (
-      ((e.clientX - offset[draggingShip2].x) / window.innerWidth) *
-      100
-    ).toFixed(2);
-    const resultY = (
-      ((e.clientY - offset[draggingShip2].y) / window.innerHeight) *
-      100
-    ).toFixed(2);
-
-    setPos((prev) => ({
-      ...prev,
-      [draggingShip2]: {
-        x: resultX,
-        y: resultY
-      }
-    }));
-
-    const shipBordersCoordinates = {
-      left: rect.left,
-      top: rect.top,
-      right: window.innerWidth - rect.right,
-      bottom: window.innerHeight - rect.bottom,
-      center: { x: rect.tleft + rect.width / 2, y: rect.top + rect.height / 2 }
-    };
-    onDropShip(
-      shipBordersCoordinates,
-      draggingShip2,
-      orientation,
-      e.clientX,
-      e.clientY
-    );
-  }, [orientation]);
+    onDropShip(ShipCoordinates, draggingShip2, orientation, ETarget.current.clientX, ETarget.current.clientY);
+    ETarget.current = null;
+  },[orientation, pos[draggingShip2], RECT.current])
 
   useEffect(() => {
     function handleMouseMove(e) {
       if (!draggingShip) return;
 
       const resultX = (
-        ((e.clientX - offset[draggingShip].x) / window.innerWidth) *
+        ((window.innerWidth - e.clientX + offset[draggingShip].x) / window.innerWidth) *
         100
       ).toFixed(2);
       const resultY = (
@@ -160,9 +142,11 @@ const ShipsContainer = memo(function ShipsContainer({
         center: { x: left + width / 2, y: top + height / 2 }
       };
 
+      setCenter({ x: left + width / 2, y: top + height / 2 });
+
       const shipSize = e.target.closest('[data-ship]').dataset.ship;
 
-      console.log(shipBordersCoordinates);
+      // console.log(shipBordersCoordinates);
       // console.log(shipBordersCoordinates.right, "right cursor");
       // console.log(shipBordersCoordinates.bottom, "bottom cursor")
       // console.log(shipBordersCoordinates.left, "left cursor")
@@ -197,24 +181,13 @@ const ShipsContainer = memo(function ShipsContainer({
       {['1', '2', '3', '4', '5', '6'].map((value) => (
         <div
           key={value}
-          className="w-[calc(55%/20)] border border-amber-100 absolute -translate-y-1/2 
-                     top-1/2 left-full -translate-x-full"
+          className="border border-amber-100 absolute "
           style={{
-            left: pos[value].x === 0 ? '100%' : `${pos[value].x}%`,
+            right: pos[value].x === 0 ? '0%' : `${pos[value].x}%`,
             top: pos[value].y === 0 ? '50%' : `${pos[value].y}%`,
             cursor: 'grab',
-            height: `${
-              (HEIGHT * parseInt(value)) / 10 -
-              2 +
-              ((parseInt(value) - 1) * 2) / 9 -
-              5
-            }px`,
-            width: `${
-              (WIDTH * parseInt(value)) / 10 -
-              2 +
-              ((parseInt(value) - 1) * 2) / 9 -
-              5
-            }px}`
+            height: `${ (HEIGHT * parseInt(value)) / 10 - 2 + ((parseInt(value) - 1) * 2) / 9 - 5 }px`,
+            width: `${ WIDTH / 10 - 2}px`
           }}
           onMouseDown={handleMouseDown}
           onDoubleClick={rotateShip}
