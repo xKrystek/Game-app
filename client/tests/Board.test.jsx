@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, test, expect, vi, beforeEach } from 'vitest';
-import Board from '@/src/board/board';
-import { TaskManagerContext } from '@/src/context/taskManagerContext';
+import Board from '@/src/board/TicTacToeBoard';
+import { TicTacToeContext } from '@/src/context/TicTacToeContext';
 import * as apiCalls from '@/src/services/apiCalls';
 import { MemoryRouter } from 'react-router-dom';
 
@@ -25,7 +25,17 @@ vi.spyOn(apiCalls, 'callLogoutUser').mockResolvedValue();
 // ---------- MOCK CONTEXT ----------
 
 const mockContext = {
-  board: { one: '', two: '', three: '', four: '', five: '', six: '', seven: '', eight: '', nine: '' },
+  board: {
+    one: '',
+    two: '',
+    three: '',
+    four: '',
+    five: '',
+    six: '',
+    seven: '',
+    eight: '',
+    nine: ''
+  },
   player: 'X',
   setTie: vi.fn(),
   tie: false,
@@ -44,9 +54,11 @@ const mockContext = {
 function renderBoard(contextOverrides = {}) {
   return render(
     <MemoryRouter>
-      <TaskManagerContext.Provider value={{ ...mockContext, ...contextOverrides }}>
+      <TicTacToeContext.Provider
+        value={{ ...mockContext, ...contextOverrides }}
+      >
         <Board />
-      </TaskManagerContext.Provider>
+      </TicTacToeContext.Provider>
     </MemoryRouter>
   );
 }
@@ -113,4 +125,3 @@ describe('Board Component', () => {
     expect(mockedNavigate).toHaveBeenCalledWith('/auth');
   });
 });
-

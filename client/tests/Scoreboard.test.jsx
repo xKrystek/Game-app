@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { describe, test, expect, vi } from 'vitest';
 import Scoreboard from '@/src/scoreboard/scoreboard';
-import { TaskManagerContext } from '@/src/context/taskManagerContext';
+import { TicTacToeContext } from '@/src/context/TicTacToeContext';
 
 describe('Scoreboard rematch flow', () => {
   test('Only you clicked rematch → section visible', () => {
@@ -10,9 +10,12 @@ describe('Scoreboard rematch flow', () => {
     const setRematchOponent = vi.fn();
 
     render(
-      <TaskManagerContext.Provider
+      <TicTacToeContext.Provider
         value={{
-          playersUsernamesList: [['example', 'abc'], ['example2', 'xxx']],
+          playersUsernamesList: [
+            ['example', 'abc'],
+            ['example2', 'xxx']
+          ],
           socketRef: { current: { id: 'abc' } },
           rematch: true,
           setRematch,
@@ -21,11 +24,11 @@ describe('Scoreboard rematch flow', () => {
           setRematchYou,
           setRematchOponent,
           yourScore: 0,
-          oponentScore: 0,
+          oponentScore: 0
         }}
       >
         <Scoreboard />
-      </TaskManagerContext.Provider>
+      </TicTacToeContext.Provider>
     );
 
     const rematchWrapper = screen.getByText(/rematch/).parentElement;
@@ -39,9 +42,12 @@ describe('Scoreboard rematch flow', () => {
     const setRematchOponent = vi.fn();
 
     render(
-      <TaskManagerContext.Provider
+      <TicTacToeContext.Provider
         value={{
-          playersUsernamesList: [['example', 'abc'], ['example2', 'xxx']],
+          playersUsernamesList: [
+            ['example', 'abc'],
+            ['example2', 'xxx']
+          ],
           socketRef: { current: { id: 'abc' } },
           rematch: true,
           setRematch,
@@ -50,11 +56,11 @@ describe('Scoreboard rematch flow', () => {
           setRematchYou,
           setRematchOponent,
           yourScore: 0,
-          oponentScore: 0,
+          oponentScore: 0
         }}
       >
         <Scoreboard />
-      </TaskManagerContext.Provider>
+      </TicTacToeContext.Provider>
     );
 
     const rematchWrapper = screen.getByText(/rematch/).parentElement;
@@ -68,9 +74,12 @@ describe('Scoreboard rematch flow', () => {
     const setRematchOponent = vi.fn();
 
     render(
-      <TaskManagerContext.Provider
+      <TicTacToeContext.Provider
         value={{
-          playersUsernamesList: [['example', 'abc'], ['example2', 'xxx']],
+          playersUsernamesList: [
+            ['example', 'abc'],
+            ['example2', 'xxx']
+          ],
           socketRef: { current: { id: 'abc' } },
           rematch: true,
           setRematch,
@@ -79,11 +88,11 @@ describe('Scoreboard rematch flow', () => {
           setRematchYou,
           setRematchOponent,
           yourScore: 0,
-          oponentScore: 0,
+          oponentScore: 0
         }}
       >
         <Scoreboard />
-      </TaskManagerContext.Provider>
+      </TicTacToeContext.Provider>
     );
 
     const rematchWrapper = screen.getByText(/rematch/).parentElement;
@@ -96,6 +105,6 @@ describe('Scoreboard rematch flow', () => {
     // rematch section should be invisible
     waitFor(() => {
       expect(rematchWrapper).toHaveClass('invisible');
-    })
+    });
   });
 });

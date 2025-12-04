@@ -1,7 +1,8 @@
 import { useNavigate } from 'react-router-dom';
 import { callLogoutUser } from '../services/apiCalls.js';
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useContext, useLayoutEffect, useRef, useState } from 'react';
 import ShipsContainer from './shipsContainer.jsx';
+import { ShipsContext } from '../context/ShipsContext.jsx';
 
 function ShipsBoard() {
   const navigate = useNavigate();
@@ -10,14 +11,7 @@ function ShipsBoard() {
     callLogoutUser().then(() => navigate('/auth'));
   };
 
-  const [highlighted, setHighlighted] = useState({
-    '1': [],
-    '2': [],
-    '3': [],
-    '4': [],
-    '5': [],
-    '6': [],
-  });
+  const {highlighted, setHighlighted} = useContext(ShipsContext);
 
   const [HEIGHT, setHEIGHT] = useState(0);
   const [WIDTH, setWIDTH] = useState(0);
@@ -26,9 +20,6 @@ function ShipsBoard() {
   const BoardRef = useRef(null);
   const cellsRef = useRef({});
   const [cellsPositions, setCellsPositions] = useState({});
-
-  // DOMRects
-  const cellRects = useRef({});
 
   /** 
    * Measure cells & board immediately after mount and before paint 

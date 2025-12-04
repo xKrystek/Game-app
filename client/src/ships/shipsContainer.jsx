@@ -7,7 +7,6 @@ const ShipsContainer = memo(function ShipsContainer({
   cellsPositions,
   shipPlacement
 }) {
-
   // console.log(shipPlacement, "ship placement");
   const [pos, setPos] = useState({
     1: { x: 0, y: 0 },
@@ -27,6 +26,7 @@ const ShipsContainer = memo(function ShipsContainer({
     6: { x: 0, y: 0 }
   });
 
+  const [readyToSnap, setReadyToSnap] = useState(false);
   const [center, setCenter] = useState(null);
   const [draggingShip, setDraggingShip] = useState(null);
   const [draggingShip2, setDraggingShip2] = useState(null);
@@ -42,7 +42,6 @@ const ShipsContainer = memo(function ShipsContainer({
   });
 
   const ETarget = useRef(null);
-  const RECT = useRef(null);
 
   function handleMouseDown(e) {
     const ship = e.target.closest('[data-ship]').dataset.ship;
@@ -70,15 +69,21 @@ const ShipsContainer = memo(function ShipsContainer({
     e.target.style.height = `${draggedElWidth.current}px`;
     const rectForSetPosition = e.target.getBoundingClientRect();
     const ship = e.target.closest('[data-ship]').dataset.ship;
-    
+
     setPos((prev) => ({
       ...prev,
       [draggingShip2]: {
-        x: (((window.innerWidth - center.x - rectForSetPosition.width / 2) / window.innerWidth) * 100).toFixed(2),
-        y: (((center.y - (rectForSetPosition.height / 2)) / window.innerHeight) * 100).toFixed(2)
+        x: (
+          ((window.innerWidth - center.x - rectForSetPosition.width / 2) /
+            window.innerWidth) *
+          100
+        ).toFixed(2),
+        y: (
+          ((center.y - rectForSetPosition.height / 2) / window.innerHeight) *
+          100
+        ).toFixed(2)
       }
     }));
-
 
     setOrientation((prev) => ({
       ...prev,
@@ -87,29 +92,93 @@ const ShipsContainer = memo(function ShipsContainer({
   }
 
   useLayoutEffect(() => {
-  
-    if(!ETarget.current) return;
-    
+    if (!ETarget.current) return;
+
     const rect = ETarget.current.target.getBoundingClientRect();
 
     const ShipCoordinates = {
-        left: rect.left,
-        top: rect.top,
-        right: window.innerWidth - rect.right,
-        bottom: window.innerHeight - rect.bottom,
-        center: { x: center.x, y: center.y }
-    }
+      left: rect.left,
+      top: rect.top,
+      right: window.innerWidth - rect.right,
+      bottom: window.innerHeight - rect.bottom,
+      center: { x: center.x, y: center.y }
+    };
 
-    onDropShip(ShipCoordinates, draggingShip2, orientation, ETarget.current.clientX, ETarget.current.clientY);
+    onDropShip(
+      ShipCoordinates,
+      draggingShip2,
+      orientation,
+      ETarget.current.clientX,
+      ETarget.current.clientY
+    );
     ETarget.current = null;
-  },[orientation, pos[draggingShip2], RECT.current])
+    setReadyToSnap(true);
+  }, [orientation, pos[draggingShip2]]);
+
+  useEffect(() => {
+    if (readyToSnap) {
+      console.log(orientation[draggingShip2]);
+      console.log(shipPlacement, "ship placement");
+      const shipPlacementLength = Object.entries(
+        shipPlacement[draggingShip2]
+      ).length;
+      if (orientation[draggingShip2] === 'vertical') {
+        console.log('triggered 1');
+        console.log(shipPlacement[draggingShip2][shipPlacementLength - 1], "trig 1")
+        setPos((prev) => ({
+          ...prev,
+          [draggingShip2]: {
+            x: (
+              ((window.innerWidth -
+                cellsPositions[
+                  shipPlacement[draggingShip2][0]
+                ].right) /
+                window.innerWidth) *
+              100
+            ).toFixed(2),
+            y: (
+              (cellsPositions[
+                shipPlacement[draggingShip2][0]
+              ].top /
+                window.innerHeight) *
+              100
+            ).toFixed(2)
+          }
+        }));
+        setReadyToSnap(false);
+      } else {
+        console.log('triggered 2');
+        console.log(shipPlacement[draggingShip2][0], "trig 2")
+        setPos((prev) => ({
+          ...prev,
+          [draggingShip2]: {
+            x: (
+              ((window.innerWidth -
+                cellsPositions[
+                  shipPlacement[draggingShip2][shipPlacementLength - 1]
+                ].right) /
+                window.innerWidth) *
+              100
+            ).toFixed(2),
+            y: (
+              (cellsPositions[shipPlacement[draggingShip2][shipPlacementLength - 1]].top /
+                window.innerHeight) *
+              100
+            ).toFixed(2)
+          }
+        }));
+        setReadyToSnap(false);
+      }
+    }
+  }, [orientation, shipPlacement]);
 
   useEffect(() => {
     function handleMouseMove(e) {
       if (!draggingShip) return;
 
       const resultX = (
-        ((window.innerWidth - e.clientX + offset[draggingShip].x) / window.innerWidth) *
+        ((window.innerWidth - e.clientX + offset[draggingShip].x) /
+          window.innerWidth) *
         100
       ).toFixed(2);
       const resultY = (
@@ -159,6 +228,7 @@ const ShipsContainer = memo(function ShipsContainer({
         e.clientX,
         e.clientY
       );
+      setReadyToSnap(true);
     }
 
     function windowPreventDefault(e) {
@@ -186,8 +256,9 @@ const ShipsContainer = memo(function ShipsContainer({
             right: pos[value].x === 0 ? '0%' : `${pos[value].x}%`,
             top: pos[value].y === 0 ? '50%' : `${pos[value].y}%`,
             cursor: 'grab',
-            height: `${ (HEIGHT * parseInt(value)) / 10 - 2 + ((parseInt(value) - 1) * 2) / 9 - 5 }px`,
-            width: `${ WIDTH / 10 - 2}px`
+            height: `${
+              (HEIGHT * parseInt(value)) / 10 - 2}px`,
+            width: `${WIDTH / 10 - 2}px`
           }}
           onMouseDown={handleMouseDown}
           onDoubleClick={rotateShip}
