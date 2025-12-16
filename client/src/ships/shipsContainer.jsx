@@ -27,6 +27,8 @@ const ShipsContainer = memo(function ShipsContainer({
   });
 
   const [readyToSnap, setReadyToSnap] = useState(false);
+  const singleClickTimeout = useRef(null);
+
   const [center, setCenter] = useState(null);
   const [draggingShip, setDraggingShip] = useState(null);
   const [draggingShip2, setDraggingShip2] = useState(null);
@@ -64,6 +66,7 @@ const ShipsContainer = memo(function ShipsContainer({
   }
 
   function rotateShip(e) {
+    clearTimeout(singleClickTimeout.current);
     ETarget.current = e;
     e.target.style.width = `${draggedElHeight.current}px`;
     e.target.style.height = `${draggedElWidth.current}px`;
@@ -118,28 +121,27 @@ const ShipsContainer = memo(function ShipsContainer({
   useEffect(() => {
     if (readyToSnap) {
       console.log(orientation[draggingShip2]);
-      console.log(shipPlacement, "ship placement");
+      console.log(shipPlacement, 'ship placement');
       const shipPlacementLength = Object.entries(
         shipPlacement[draggingShip2]
       ).length;
       if (orientation[draggingShip2] === 'vertical') {
         console.log('triggered 1');
-        console.log(shipPlacement[draggingShip2][shipPlacementLength - 1], "trig 1")
+        console.log(
+          shipPlacement[draggingShip2][shipPlacementLength - 1],
+          'trig 1'
+        );
         setPos((prev) => ({
           ...prev,
           [draggingShip2]: {
             x: (
               ((window.innerWidth -
-                cellsPositions[
-                  shipPlacement[draggingShip2][0]
-                ].right) /
+                cellsPositions[shipPlacement[draggingShip2][0]].right) /
                 window.innerWidth) *
               100
             ).toFixed(2),
             y: (
-              (cellsPositions[
-                shipPlacement[draggingShip2][0]
-              ].top /
+              (cellsPositions[shipPlacement[draggingShip2][0]].top /
                 window.innerHeight) *
               100
             ).toFixed(2)
@@ -148,7 +150,7 @@ const ShipsContainer = memo(function ShipsContainer({
         setReadyToSnap(false);
       } else {
         console.log('triggered 2');
-        console.log(shipPlacement[draggingShip2][0], "trig 2")
+        console.log(shipPlacement[draggingShip2][0], 'trig 2');
         setPos((prev) => ({
           ...prev,
           [draggingShip2]: {
@@ -161,7 +163,9 @@ const ShipsContainer = memo(function ShipsContainer({
               100
             ).toFixed(2),
             y: (
-              (cellsPositions[shipPlacement[draggingShip2][shipPlacementLength - 1]].top /
+              (cellsPositions[
+                shipPlacement[draggingShip2][shipPlacementLength - 1]
+              ].top /
                 window.innerHeight) *
               100
             ).toFixed(2)
@@ -200,6 +204,8 @@ const ShipsContainer = memo(function ShipsContainer({
     function handleMouseUp(e) {
       setDraggingShip(false);
 
+      clearTimeout(singleClickTimeout.current);
+
       const { left, top, right, bottom, width, height } =
         e.target.getBoundingClientRect();
 
@@ -221,14 +227,16 @@ const ShipsContainer = memo(function ShipsContainer({
       // console.log(shipBordersCoordinates.left, "left cursor")
       // console.log(shipBordersCoordinates.top, "top cursor")
 
-      onDropShip(
-        shipBordersCoordinates,
-        shipSize,
-        orientation,
-        e.clientX,
-        e.clientY
-      );
-      setReadyToSnap(true);
+      singleClickTimeout.current = setTimeout(() => {
+        onDropShip(
+          shipBordersCoordinates,
+          shipSize,
+          orientation,
+          e.clientX,
+          e.clientY
+        );
+        setReadyToSnap(true);
+      }, 50);
     }
 
     function windowPreventDefault(e) {
@@ -256,8 +264,7 @@ const ShipsContainer = memo(function ShipsContainer({
             right: pos[value].x === 0 ? '0%' : `${pos[value].x}%`,
             top: pos[value].y === 0 ? '50%' : `${pos[value].y}%`,
             cursor: 'grab',
-            height: `${
-              (HEIGHT * parseInt(value)) / 10 - 2}px`,
+            height: `${(HEIGHT * parseInt(value)) / 10 - 2}px`,
             width: `${WIDTH / 10 - 2}px`
           }}
           onMouseDown={handleMouseDown}
