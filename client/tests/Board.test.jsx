@@ -12,10 +12,12 @@ const mockedNavigate = vi.fn();
 
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom');
+
   return {
-    ...actual,
-    useNavigate: () => mockedNavigate,
-    MemoryRouter: actual.MemoryRouter
+    __esModule: true,        // IMPORTANT
+    ...actual,              // preserve everything
+    default: actual.default, // preserve default export
+    useNavigate: () => mockedNavigate
   };
 });
 
@@ -25,7 +27,17 @@ vi.spyOn(apiCalls, 'callLogoutUser').mockResolvedValue();
 // ---------- MOCK CONTEXT ----------
 
 const mockContext = {
-  board: { one: '', two: '', three: '', four: '', five: '', six: '', seven: '', eight: '', nine: '' },
+  board: {
+    one: '',
+    two: '',
+    three: '',
+    four: '',
+    five: '',
+    six: '',
+    seven: '',
+    eight: '',
+    nine: ''
+  },
   player: 'X',
   setTie: vi.fn(),
   tie: false,
@@ -44,7 +56,9 @@ const mockContext = {
 function renderBoard(contextOverrides = {}) {
   return render(
     <MemoryRouter>
-      <TaskManagerContext.Provider value={{ ...mockContext, ...contextOverrides }}>
+      <TaskManagerContext.Provider
+        value={{ ...mockContext, ...contextOverrides }}
+      >
         <Board />
       </TaskManagerContext.Provider>
     </MemoryRouter>
@@ -113,4 +127,3 @@ describe('Board Component', () => {
     expect(mockedNavigate).toHaveBeenCalledWith('/auth');
   });
 });
-
