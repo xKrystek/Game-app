@@ -28,13 +28,15 @@ const ShipsContainer = memo(function ShipsContainer({
 
   const [readyToSnap, setReadyToSnap] = useState(false);
   const singleClickTimeout = useRef(null);
-
-  const [center, setCenter] = useState(null);
-  const [draggingShip, setDraggingShip] = useState(null);
-  const [draggingShip2, setDraggingShip2] = useState(null);
-  const draggedElWidth = useRef(0);
-  const draggedElHeight = useRef(0);
-  const [orientation, setOrientation] = useState({
+  const [rotateDeg, setRotateDeg] = useState({
+    1: 0,
+    2: 0,
+    3: 0,
+    4: 0,
+    5: 0,
+    6: 0
+  });
+  const orientationRef = useRef({
     1: 'vertical',
     2: 'vertical',
     3: 'vertical',
@@ -42,6 +44,12 @@ const ShipsContainer = memo(function ShipsContainer({
     5: 'vertical',
     6: 'vertical'
   });
+
+  const [center, setCenter] = useState(null);
+  const [draggingShip, setDraggingShip] = useState(null);
+  const [draggingShip2, setDraggingShip2] = useState(null);
+  const draggedElWidth = useRef(0);
+  const draggedElHeight = useRef(0);
 
   const ETarget = useRef(null);
 
@@ -52,6 +60,9 @@ const ShipsContainer = memo(function ShipsContainer({
 
     draggedElWidth.current = rect.width;
     draggedElHeight.current = rect.height;
+
+    console.log(rect.width, 'width');
+    console.log(rect.height, 'height');
 
     setOffset((prev) => ({
       ...prev,
@@ -68,30 +79,16 @@ const ShipsContainer = memo(function ShipsContainer({
   function rotateShip(e) {
     clearTimeout(singleClickTimeout.current);
     ETarget.current = e;
-    e.target.style.width = `${draggedElHeight.current}px`;
-    e.target.style.height = `${draggedElWidth.current}px`;
-    const rectForSetPosition = e.target.getBoundingClientRect();
+
     const ship = e.target.closest('[data-ship]').dataset.ship;
 
-    setPos((prev) => ({
+    const prevRotateValue = rotateDeg[ship];
+    setRotateDeg((prev) => ({ ...prev, [ship]: (prevRotateValue + 90) % 360 }));
+    orientationRef.current = {
       ...prev,
-      [draggingShip2]: {
-        x: (
-          ((window.innerWidth - center.x - rectForSetPosition.width / 2) /
-            window.innerWidth) *
-          100
-        ).toFixed(2),
-        y: (
-          ((center.y - rectForSetPosition.height / 2) / window.innerHeight) *
-          100
-        ).toFixed(2)
-      }
-    }));
-
-    setOrientation((prev) => ({
-      ...prev,
-      [ship]: orientation[ship] === 'vertical' ? 'horizontal' : 'vertical'
-    }));
+      [ship]:
+        orientationRef.current[ship] === 'vertical' ? 'horizontal' : 'vertical'
+    };
   }
 
   useLayoutEffect(() => {
@@ -110,27 +107,27 @@ const ShipsContainer = memo(function ShipsContainer({
     onDropShip(
       ShipCoordinates,
       draggingShip2,
-      orientation,
+      orientationRef.current,
       ETarget.current.clientX,
       ETarget.current.clientY
     );
     ETarget.current = null;
-    setReadyToSnap(true);
-  }, [orientation, pos[draggingShip2]]);
+    // setReadyToSnap(true);
+  }, [rotateDeg]);
 
   useEffect(() => {
     if (readyToSnap) {
-      console.log(orientation[draggingShip2]);
-      console.log(shipPlacement, 'ship placement');
+      // console.log(orientationRef.current[draggingShip2]);
+      // console.log(shipPlacement, 'ship placement');
       const shipPlacementLength = Object.entries(
         shipPlacement[draggingShip2]
       ).length;
-      if (orientation[draggingShip2] === 'vertical') {
-        console.log('triggered 1');
-        console.log(
-          shipPlacement[draggingShip2][shipPlacementLength - 1],
-          'trig 1'
-        );
+      if (orientationRef.current[draggingShip2] === 'vertical') {
+        // console.log('triggered 1');
+        // console.log(
+        //   shipPlacement[draggingShip2][shipPlacementLength - 1],
+        //   'trig 1'
+        // );
         setPos((prev) => ({
           ...prev,
           [draggingShip2]: {
@@ -149,8 +146,8 @@ const ShipsContainer = memo(function ShipsContainer({
         }));
         setReadyToSnap(false);
       } else {
-        console.log('triggered 2');
-        console.log(shipPlacement[draggingShip2][0], 'trig 2');
+        // console.log('triggered 2');
+        // console.log(shipPlacement[draggingShip2][0], 'trig 2');
         setPos((prev) => ({
           ...prev,
           [draggingShip2]: {
@@ -174,7 +171,7 @@ const ShipsContainer = memo(function ShipsContainer({
         setReadyToSnap(false);
       }
     }
-  }, [orientation, shipPlacement]);
+  }, [orientationRef.current, shipPlacement]);
 
   useEffect(() => {
     function handleMouseMove(e) {
@@ -231,12 +228,12 @@ const ShipsContainer = memo(function ShipsContainer({
         onDropShip(
           shipBordersCoordinates,
           shipSize,
-          orientation,
+          orientationRef.current,
           e.clientX,
           e.clientY
         );
         setReadyToSnap(true);
-      }, 50);
+      }, 200);
     }
 
     function windowPreventDefault(e) {
@@ -265,7 +262,8 @@ const ShipsContainer = memo(function ShipsContainer({
             top: pos[value].y === 0 ? '50%' : `${pos[value].y}%`,
             cursor: 'grab',
             height: `${(HEIGHT * parseInt(value)) / 10 - 2}px`,
-            width: `${WIDTH / 10 - 2}px`
+            width: `${WIDTH / 10 - 2}px`,
+            transform: `rotate(${rotateDeg[value]}deg)`
           }}
           onMouseDown={handleMouseDown}
           onDoubleClick={rotateShip}
