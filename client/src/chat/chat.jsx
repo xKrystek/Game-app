@@ -1,63 +1,62 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useContext, useEffect, useRef, useState } from "react";
-import { TaskManagerContext } from "../context/taskManagerContext";
+import React, { useContext, useEffect, useRef, useState } from 'react';
+import { TicTacToeContext } from '../context/TicTacToeContext';
 
 function Chat() {
   const { socketRef, chat, setChat, user, disableChat } =
-    useContext(TaskManagerContext);
-  const [inputDisplay, setInputDisplay] = useState("");
+    useContext(TicTacToeContext);
+  const [inputDisplay, setInputDisplay] = useState('');
   const [message, setMessage] = useState({ sender: null, message: null });
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const specialKey = useRef(0);
   const secondSpecialKey = useRef(1000);
-  const [displayChat, setDisplayChat] = useState("translate-y-full");
+  const [displayChat, setDisplayChat] = useState('translate-y-full');
   const [unreadMessagesNumber, setUnreadMessagesNumber] = useState(0);
   const [numberOfSeenMessages, setNumberOfSeenMessages] = useState(0);
-  
+
   function toggleDisplayChat() {
-    displayChat === "translate-y-0"
-      ? setDisplayChat("translate-y-full")
-      : setDisplayChat("translate-y-0");
+    displayChat === 'translate-y-0'
+      ? setDisplayChat('translate-y-full')
+      : setDisplayChat('translate-y-0');
   }
 
   useEffect(() => {
-    return () =>{
+    return () => {
       setChat([]);
       setUnreadMessagesNumber(0);
-    } 
+    };
   }, []);
 
   // Emit new message
   useEffect(() => {
     if (message.sender !== null) {
-      socketRef.current?.emit("send-message", message);
+      socketRef.current?.emit('send-message', message);
     }
   }, [message]);
 
   // Auto-scroll to bottom
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chat]);
 
-
-useEffect(() => {
-  if (displayChat === "translate-y-0") {
-    setNumberOfSeenMessages(chat.length); // reset last seen
-    setUnreadMessagesNumber(0);
-  } else {
-    setUnreadMessagesNumber(chat.length - numberOfSeenMessages);
-  }
-}, [chat, displayChat]);
+  useEffect(() => {
+    if (displayChat === 'translate-y-0') {
+      setNumberOfSeenMessages(chat.length); // reset last seen
+      setUnreadMessagesNumber(0);
+    } else {
+      setUnreadMessagesNumber(chat.length - numberOfSeenMessages);
+    }
+  }, [chat, displayChat]);
 
   function sendMessage() {
-    if (inputDisplay.trim() === "") return;
+    if (inputDisplay.trim() === '') return;
     setMessage({
       sender: socketRef.current?.id,
       message: inputDisplay,
-      user: user,
+      user: user
     });
-    setInputDisplay("");
+    setInputDisplay('');
   }
 
   return (
@@ -65,10 +64,12 @@ useEffect(() => {
       <div
         id="messages-icon-container"
         onClick={toggleDisplayChat}
-        className={displayChat === "translate-y-full" ? "fade" : "invisible"}
+        className={displayChat === 'translate-y-full' ? 'fade' : 'invisible'}
         data-testid="messages-icon-container"
       >
-        { unreadMessagesNumber === 0 ? null : <div id="chat-notification">{unreadMessagesNumber}</div>}
+        {unreadMessagesNumber === 0 ? null : (
+          <div id="chat-notification">{unreadMessagesNumber}</div>
+        )}
         <svg
           width="160"
           height="129"
@@ -106,8 +107,8 @@ useEffect(() => {
                 key={++specialKey.current}
                 className={`${
                   msg.sender === socketRef.current?.id
-                    ? "self-end text-shadow-white text-[10px]"
-                    : "self-start text-white text-[10px]"
+                    ? 'self-end text-shadow-white text-[10px]'
+                    : 'self-start text-white text-[10px]'
                 }`}
               >
                 {msg.user === user ? user : msg.user}
@@ -116,8 +117,8 @@ useEffect(() => {
                 key={index}
                 className={`${
                   msg.sender === socketRef.current?.id
-                    ? "self-end bg-blue-500 text-white"
-                    : "self-start bg-gray-200 text-black"
+                    ? 'self-end bg-blue-500 text-white'
+                    : 'self-start bg-gray-200 text-black'
                 } w-fit max-w-[75%] break-words whitespace-pre-line p-2 rounded-2xl`}
               >
                 {msg.message}
@@ -134,7 +135,7 @@ useEffect(() => {
             value={inputDisplay}
             onChange={(e) => setInputDisplay(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter") sendMessage();
+              if (e.key === 'Enter') sendMessage();
             }}
             placeholder="Enter the message"
             className="border-2 p-1 flex-1 rounded text-[2vw] xl:text-[1.5vw]"

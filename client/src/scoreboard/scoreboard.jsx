@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useContext, useEffect } from 'react';
-import { TaskManagerContext } from '../context/taskManagerContext';
+import { TicTacToeContext } from '../context/TicTacToeContext';
 
 function Scoreboard() {
   const {
@@ -14,11 +14,10 @@ function Scoreboard() {
     setRematchOponent,
     yourScore,
     oponentScore
-  } = useContext(TaskManagerContext);
+  } = useContext(TicTacToeContext);
 
   useEffect(() => {
     if (rematchYou && rematchOponent) {
-      console.log('triggered');
       setRematch(false);
       setRematchOponent(false);
       setRematchYou(false);

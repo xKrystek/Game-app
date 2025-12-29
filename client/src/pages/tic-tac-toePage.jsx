@@ -1,5 +1,5 @@
 import React from 'react';
-import Board from '../board/board';
+import Board from '../board/TicTacToeBoard';
 import Chat from '../chat/chat';
 import Scoreboard from '../scoreboard/scoreboard';
 

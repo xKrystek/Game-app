@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useContext, useEffect } from 'react';
-import { TaskManagerContext } from '../context/taskManagerContext';
+import { TicTacToeContext } from '../context/TicTacToeContext';
 import { callLogoutUser } from '../services/apiCalls';
 import { useNavigate } from 'react-router-dom';
 import numberWords from '../scripts/wordListGenerator';
@@ -21,7 +21,7 @@ function Board() {
     gameOver,
     setGameOver,
     setRematch
-  } = useContext(TaskManagerContext);
+  } = useContext(TicTacToeContext);
 
   const navigate = useNavigate();
 

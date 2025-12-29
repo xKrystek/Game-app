@@ -1,10 +1,10 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { callUserAuthApi } from '../services/apiCalls';
 import { io } from 'socket.io-client';
 import GameCheck from '../board/game-check/TTTGameCheck';
-import { TaskManagerContext } from './taskManagerContext';
+import { TicTacToeContext } from './TicTacToeContext';
 
 const getBackendUrl = () => {
   if (typeof window !== 'undefined') {
@@ -17,7 +17,7 @@ const getBackendUrl = () => {
 
 const BACKEND_URL = getBackendUrl();
 
-function TaskManagerProvider({ children }) {
+function TicTacToeProvider({ children }) {
   // -----------------------------
   // 🟢 BOARD STATE
   // -----------------------------
@@ -81,29 +81,38 @@ function TaskManagerProvider({ children }) {
   // -----------------------------
   // ⚙️ HANDLERS
   // -----------------------------
-  function handleBoardOnClick(event) {
-    const cellDiv = event.target.closest('[data-cell]');
-    if (!cellDiv) return;
+  const handleBoardOnClick = useCallback(
+    (event) => {
+      const cellDiv = event.target.closest('[data-cell]');
+      if (!cellDiv) return;
 
-    console.log('triggered');
-    const cell = cellDiv.dataset.cell;
-    if (!yourTurn || board[cell]) return;
+      const cell = cellDiv.dataset.cell;
+      if (!yourTurn || board[cell]) return;
 
-    const updatedBoard = { ...board, [cell]: player };
+      const updatedBoard = { ...board, [cell]: player };
 
-    storedInfo[storedCurrentSidsIndex][1][1] =
-      !storedInfo[storedCurrentSidsIndex][1][1];
-    storedInfo[storedOtherSidsIndex][1][1] =
-      !storedInfo[storedOtherSidsIndex][1][1];
+      storedInfo[storedCurrentSidsIndex][1][1] =
+        !storedInfo[storedCurrentSidsIndex][1][1];
+      storedInfo[storedOtherSidsIndex][1][1] =
+        !storedInfo[storedOtherSidsIndex][1][1];
 
-    socketRef.current.emit('player-move', updatedBoard, storedInfo);
-  }
+      socketRef.current.emit('player-move', updatedBoard, storedInfo);
+    },
+    [
+      board,
+      yourTurn,
+      player,
+      storedInfo,
+      storedCurrentSidsIndex,
+      storedOtherSidsIndex
+    ]
+  );
 
-  function playAgainButton() {
+  const playAgainButton = useCallback(() => {
     socketRef.current.emit('play-again');
     setDisplayBtn(false);
     socketRef.current.emit('rematch', [socketId, true]);
-  }
+  }, [socketId]);
 
   // -----------------------------
   // 🧠 MAIN EFFECT — AUTH + SOCKET SETUP
@@ -204,17 +213,17 @@ function TaskManagerProvider({ children }) {
         });
       });
 
-      socketRef.current.on("win", (score) => {
-        for(const key in score){
-          if(key === socketRef.current?.id) setYourScore(score[key]);
+      socketRef.current.on('win', (score) => {
+        for (const key in score) {
+          if (key === socketRef.current?.id) setYourScore(score[key]);
         }
-      })
+      });
 
-      socketRef.current.on("lose", (score) => {
-        for(const key in score){
-          if(key !== socketRef.current?.id) setOponentScore(score[key]);
+      socketRef.current.on('lose', (score) => {
+        for (const key in score) {
+          if (key !== socketRef.current?.id) setOponentScore(score[key]);
         }
-      })
+      });
 
       socketRef.current.on('playerDisconnect', () => {
         setYourTurn(undefined);
@@ -275,16 +284,15 @@ function TaskManagerProvider({ children }) {
         setDisplayBtn(false);
         setGameOver(false);
 
-        socketRef.current.off("score");
-        socketRef.current.off("play-again");
-        socketRef.current.off("send-message");
-        socketRef.current.off("rematch");
-        socketRef.current.off("playerValues");
-        socketRef.current.off("playerDisconnect");
-        socketRef.current.off("listOfUsernames");
-        socketRef.current.off("connect");
-        socketRef.current.off("player-move");
-
+        socketRef.current.off('score');
+        socketRef.current.off('play-again');
+        socketRef.current.off('send-message');
+        socketRef.current.off('rematch');
+        socketRef.current.off('playerValues');
+        socketRef.current.off('playerDisconnect');
+        socketRef.current.off('listOfUsernames');
+        socketRef.current.off('connect');
+        socketRef.current.off('player-move');
 
         socketRef.current?.disconnect();
         socketRef.current = null;
@@ -316,7 +324,7 @@ function TaskManagerProvider({ children }) {
   // 🧩 CONTEXT PROVIDER
   // -----------------------------
   return (
-    <TaskManagerContext.Provider
+    <TicTacToeContext.Provider
       value={{
         board,
         setBoard,
@@ -362,8 +370,8 @@ function TaskManagerProvider({ children }) {
       }}
     >
       {children}
-    </TaskManagerContext.Provider>
+    </TicTacToeContext.Provider>
   );
 }
 
-export default TaskManagerProvider;
+export default TicTacToeProvider;

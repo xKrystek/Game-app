@@ -1,3 +1,4 @@
+require("dotenv").config();
 const jwt = require('jsonwebtoken');
 const user = require('../models/User');
 
@@ -14,7 +15,7 @@ const authMiddleware = async (req, res) => {
   }
 
   try {
-    const decoded = jwt.verify(token, 'DEFAULT_SECRET_KEY');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     console.log(' ');
     const userCredentials = await user.findById(decoded.getId);
     console.log(decoded, 'decoded');

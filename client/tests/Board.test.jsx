@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, test, expect, vi, beforeEach } from 'vitest';
-import Board from '@/src/board/board';
-import { TaskManagerContext } from '@/src/context/taskManagerContext';
+import Board from '@/src/board/TicTacToeBoard';
+import { TicTacToeContext } from '@/src/context/TicTacToeContext';
 import * as apiCalls from '@/src/services/apiCalls';
 import { MemoryRouter } from 'react-router-dom';
 
@@ -56,11 +56,15 @@ const mockContext = {
 function renderBoard(contextOverrides = {}) {
   return render(
     <MemoryRouter>
+<<<<<<< HEAD
       <TaskManagerContext.Provider
+=======
+      <TicTacToeContext.Provider
+>>>>>>> bb300400509a0f8300ea06db78bfe5385fb42378
         value={{ ...mockContext, ...contextOverrides }}
       >
         <Board />
-      </TaskManagerContext.Provider>
+      </TicTacToeContext.Provider>
     </MemoryRouter>
   );
 }
