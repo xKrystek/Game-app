@@ -1,16 +1,19 @@
 import { memo, useEffect, useRef, useState } from 'react';
 
 const SHIPS = ['1', '2', '3', '4', '5', '6'];
-const DRAG_THRESHOLD = 4; // px
+const DRAG_THRESHOLD = 4;
 
 const ShipsContainer = memo(function ShipsContainer({
   onDropShip,
+  onHighlight,
   WIDTH,
   HEIGHT
 }) {
   const draggingRef = useRef(null);
   const offsetRef = useRef({ x: 0, y: 0 });
   const startPosRef = useRef({ x: 0, y: 0 });
+
+  const pendingHighlightRef = useRef(null);
 
   const [ships, setShips] = useState(() =>
     SHIPS.reduce((acc, id) => {
@@ -19,15 +22,13 @@ const ShipsContainer = memo(function ShipsContainer({
           x: window.innerWidth * 0.9,
           y: window.innerHeight / 2
         },
-        orientation: 'vertical', // LOGICAL ONLY
-        rotation: 0,              // VISUAL ONLY
+        orientation: 'vertical',
+        rotation: 0,
         length: parseInt(id)
       };
       return acc;
     }, {})
   );
-
-  /* ---------------- DRAG START ---------------- */
 
   function handleMouseDown(e, id) {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -47,23 +48,33 @@ const ShipsContainer = memo(function ShipsContainer({
     draggingRef.current = id;
   }
 
-  /* ---------------- DRAG MOVE / END ---------------- */
-
   useEffect(() => {
     function onMouseMove(e) {
+      e.preventDefault();
       const id = draggingRef.current;
       if (!id) return;
 
-      setShips(prev => ({
-        ...prev,
-        [id]: {
-          ...prev[id],
-          center: {
-            x: e.clientX - offsetRef.current.x,
-            y: e.clientY - offsetRef.current.y
+      setShips((prev) => {
+        const shipPlaced = {
+          ...prev,
+          [id]: {
+            ...prev[id],
+            center: {
+              x: e.clientX - offsetRef.current.x,
+              y: e.clientY - offsetRef.current.y
+            }
           }
+        };
+        const snap = onDropShip(prev[id], id);
+        if (!snap){
+          pendingHighlightRef.current = {id, cells: []};
+          return shipPlaced;
         }
-      }));
+
+        pendingHighlightRef.current = { id, cells: snap.cells };
+
+        return shipPlaced;
+      });
     }
 
     function onMouseUp(e) {
@@ -75,14 +86,14 @@ const ShipsContainer = memo(function ShipsContainer({
       const dx = Math.abs(e.clientX - startPosRef.current.x);
       const dy = Math.abs(e.clientY - startPosRef.current.y);
 
-      // CLICK → do nothing (allows double click)
       if (dx < DRAG_THRESHOLD && dy < DRAG_THRESHOLD) return;
 
-      // REAL DRAG → snap
-      setShips(prev => {
+      setShips((prev) => {
         const ship = prev[id];
         const snap = onDropShip(ship, id);
         if (!snap) return prev;
+
+        pendingHighlightRef.current = { id, cells: snap.cells };
 
         return {
           ...prev,
@@ -103,10 +114,8 @@ const ShipsContainer = memo(function ShipsContainer({
     };
   }, [onDropShip]);
 
-  /* ---------------- ROTATE + RESNAP ---------------- */
-
   function handleRotate(id) {
-    setShips(prev => {
+    setShips((prev) => {
       const ship = prev[id];
       const rotated = {
         ...ship,
@@ -115,7 +124,11 @@ const ShipsContainer = memo(function ShipsContainer({
         rotation: (ship.rotation + 90) % 360
       };
 
-      const snap = onDropShip(rotated, id);
+      const snap = onDropShip(rotated);
+
+      if (snap) {
+        pendingHighlightRef.current = { id, cells: snap.cells };
+      }
 
       return {
         ...prev,
@@ -124,30 +137,36 @@ const ShipsContainer = memo(function ShipsContainer({
     });
   }
 
-  /* ---------------- RENDER ---------------- */
+
+  useEffect(() => {
+    if (!pendingHighlightRef.current) return;
+
+    const { id, cells } = pendingHighlightRef.current;
+    pendingHighlightRef.current = null;
+    onHighlight(id, cells);
+
+    if (!pendingShipsPlaced.current) return;
+
+  });
 
   return (
     <>
-      {SHIPS.map(id => {
+      {SHIPS.map((id) => {
         const ship = ships[id];
         const cellW = WIDTH / 10;
         const cellH = HEIGHT / 10;
 
-        // 🔥 IMPORTANT: ALWAYS VERTICAL GEOMETRY
-        const width = cellW - 2;
-        const height = ship.length * cellH - 2;
-
         return (
           <div
             key={id}
-            onMouseDown={e => handleMouseDown(e, id)}
+            onMouseDown={(e) => handleMouseDown(e, id)}
             onDoubleClick={() => handleRotate(id)}
             style={{
               position: 'absolute',
               left: ship.center.x,
               top: ship.center.y,
-              width,
-              height,
+              width: cellW - 2,
+              height: ship.length * cellH - 2,
               transform: `translate(-50%, -50%) rotate(${ship.rotation}deg)`,
               border: '1px solid #fbbf24',
               cursor: 'grab',
@@ -163,4 +182,3 @@ const ShipsContainer = memo(function ShipsContainer({
 });
 
 export default ShipsContainer;
-

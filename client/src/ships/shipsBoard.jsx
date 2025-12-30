@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { callLogoutUser } from '../services/apiCalls.js';
-import { useContext, useLayoutEffect, useRef, useState } from 'react';
+import { useContext, useLayoutEffect, useRef, useState, useCallback } from 'react';
 import ShipsContainer from './ShipsContainer.jsx';
 import { ShipsContext } from '../context/ShipsContext.jsx';
 
@@ -17,76 +17,64 @@ function ShipsBoard() {
     }
   }, []);
 
-  function onDropShip(ship, shipId) {
+const onDropShip = useCallback(
+  (ship) => {
     if (!boardRect) return null;
-
     const cellSize = boardRect.height / 10;
     const len = ship.length;
 
-    /* ---------- center → anchor ---------- */
-    let anchor;
-    if (ship.orientation === 'vertical') {
-      anchor = {
-        x: ship.center.x,
-        y: ship.center.y - (len * cellSize) / 2 + cellSize / 2
-      };
+    // Determine orientation
+    const angle = ship.rotation % 360;
+    const isHorizontal = angle === 90 || angle === 270;
+
+    // Compute the index of the first cell (top-left)
+    let centerCol = (ship.center.x - boardRect.left) / cellSize;
+    let centerRow = (ship.center.y - boardRect.top) / cellSize;
+
+    let col, row;
+
+    if (isHorizontal) {
+      col = Math.floor(centerCol - (len - 1) / 2);
+      row = Math.floor(centerRow);
+      if(col < -1 || col > 11) return null;
+      if(row < -1 || row > 11) return null;
+      col = Math.max(0, Math.min(10 - len, col));
+      row = Math.max(0, Math.min(9, row));
     } else {
-      anchor = {
-        x: ship.center.x - (len * cellSize) / 2 + cellSize / 2,
-        y: ship.center.y
-      };
+      col = Math.floor(centerCol);
+      row = Math.floor(centerRow - (len - 1) / 2);
+      if(col < -1 || col > 11) return null;
+      if(row < -1 || row > 11) return null;
+      col = Math.max(0, Math.min(9, col));
+      row = Math.max(0, Math.min(10 - len, row));
     }
 
-    /* ---------- bounds ---------- */
-    if (
-      anchor.x < boardRect.left ||
-      anchor.y < boardRect.top ||
-      anchor.x > boardRect.right ||
-      anchor.y > boardRect.bottom
-    ) {
-      return null;
-    }
-
-    /* ---------- snap anchor ---------- */
-    const col = Math.floor((anchor.x - boardRect.left) / cellSize);
-    const row = Math.floor((anchor.y - boardRect.top) / cellSize);
-
-    /* ---------- compute cells ---------- */
+    // Occupied cells
     const cells = [];
     for (let i = 0; i < len; i++) {
-      if (ship.orientation === 'vertical') {
-        cells.push((row + i) * 10 + col);
-      } else {
+      if (isHorizontal) {
         cells.push(row * 10 + (col + i));
+      } else {
+        cells.push((row + i) * 10 + col);
       }
     }
 
+    // Compute exact visual center for CSS
+    // Center of first cell + (len/2) * cellSize
+    let centerX = boardRect.left + (col + (isHorizontal ? (len / 2) : 0.5)) * cellSize;
+    let centerY = boardRect.top + (row + (isHorizontal ? 0.5 : (len / 2))) * cellSize;
+
+    return { cells, center: { x: centerX, y: centerY } };
+  },
+  [boardRect]
+);
+
+
+  function handleHighlight(shipId, cells) {
     setHighlighted(prev => ({
       ...prev,
       [shipId]: cells
     }));
-
-    /* ---------- anchor → snapped center ---------- */
-    let snappedCenter;
-    if (ship.orientation === 'vertical') {
-      snappedCenter = {
-        x: boardRect.left + col * cellSize + cellSize / 2,
-        y:
-          boardRect.top +
-          row * cellSize +
-          (len * cellSize) / 2
-      };
-    } else {
-      snappedCenter = {
-        x:
-          boardRect.left +
-          col * cellSize +
-          (len * cellSize) / 2,
-        y: boardRect.top + row * cellSize + cellSize / 2
-      };
-    }
-
-    return { cells, center: snappedCenter };
   }
 
   return (
@@ -120,6 +108,7 @@ function ShipsBoard() {
       {boardRect && (
         <ShipsContainer
           onDropShip={onDropShip}
+          onHighlight={handleHighlight}
           WIDTH={boardRect.width}
           HEIGHT={boardRect.height}
         />
@@ -129,3 +118,4 @@ function ShipsBoard() {
 }
 
 export default ShipsBoard;
+

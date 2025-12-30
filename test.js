@@ -1,2 +1,3 @@
-const x = {x: 1, y: 2};
-console.log(Object.entries(x).length);
+const ar = Array.from({length: 10}).map((_,index) => index);
+
+console.log(ar);

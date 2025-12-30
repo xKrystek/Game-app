@@ -24,8 +24,8 @@ app.use(
 );
 
 app.use(cookieParser());
-app.use(express.json());
 
+app.use(express.json());
 app.use((_, res, next) => {
   res.setHeader(
     'Cache-Control',
