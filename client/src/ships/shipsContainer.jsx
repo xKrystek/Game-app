@@ -1,7 +1,6 @@
 import { memo, useEffect, useRef, useState } from 'react';
 
 const SHIPS = ['1', '2', '3', '4', '5', '6'];
-const DRAG_THRESHOLD = 4;
 
 const ShipsContainer = memo(function ShipsContainer({
   onDropShip,
@@ -15,11 +14,18 @@ const ShipsContainer = memo(function ShipsContainer({
 
   const pendingHighlightRef = useRef(null);
 
+  const [percentage, setPercentage] = useState(
+    SHIPS.reduce((acc, id) => {
+      acc[id] = { x: 90, y: 50 };
+      return acc;
+    }, {})
+  );
+
   const [ships, setShips] = useState(() =>
     SHIPS.reduce((acc, id) => {
       acc[id] = {
         center: {
-          x: window.innerWidth * 0.9,
+          x: window.innerWidth * 90 / 100,
           y: window.innerHeight / 2
         },
         orientation: 'vertical',
@@ -66,8 +72,8 @@ const ShipsContainer = memo(function ShipsContainer({
           }
         };
         const snap = onDropShip(prev[id], id);
-        if (!snap){
-          pendingHighlightRef.current = {id, cells: []};
+        if (!snap) {
+          pendingHighlightRef.current = { id, cells: [] };
           return shipPlaced;
         }
 
@@ -77,20 +83,15 @@ const ShipsContainer = memo(function ShipsContainer({
       });
     }
 
-    function onMouseUp(e) {
+    function onMouseUp() {
       const id = draggingRef.current;
       if (!id) return;
 
       draggingRef.current = null;
 
-      const dx = Math.abs(e.clientX - startPosRef.current.x);
-      const dy = Math.abs(e.clientY - startPosRef.current.y);
-
-      if (dx < DRAG_THRESHOLD && dy < DRAG_THRESHOLD) return;
-
       setShips((prev) => {
         const ship = prev[id];
-        const snap = onDropShip(ship, id);
+        const snap = onDropShip(ship);
         if (!snap) return prev;
 
         pendingHighlightRef.current = { id, cells: snap.cells };
@@ -137,6 +138,39 @@ const ShipsContainer = memo(function ShipsContainer({
     });
   }
 
+  useEffect(() => {
+    setPercentage((prv) => {
+      SHIPS.forEach((val) => {
+        prv[val] = {
+          y:
+            Number((ships[val].center.y / window.innerHeight).toFixed(2)) * 100,
+          x: Number((ships[val].center.x / window.innerWidth).toFixed(2)) * 100
+        };
+      });
+      return prv
+    });
+  }, [ships]);
+
+  useEffect(() => {
+    // console.log(ships['6'].center.x, 'ship center x before');
+    function handleResize() {
+      // console.log(percentage);
+      setShips((prev) => {
+        SHIPS.forEach((id) => {
+          prev[id].center.x = (window.innerWidth * percentage[id].x) / 100;
+          prev[id].center.y = (window.innerHeight * percentage[id].y) / 100;
+        });
+        return { ...prev };
+      });
+    }
+    window.addEventListener('resize', handleResize);
+
+    // console.log(ships['6'].center.x, 'ship center x after');
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [window.innerHeight, window.innerWidth]);
 
   useEffect(() => {
     if (!pendingHighlightRef.current) return;
@@ -144,10 +178,7 @@ const ShipsContainer = memo(function ShipsContainer({
     const { id, cells } = pendingHighlightRef.current;
     pendingHighlightRef.current = null;
     onHighlight(id, cells);
-
-    if (!pendingShipsPlaced.current) return;
-
-  });
+  }, [pendingHighlightRef.current]);
 
   return (
     <>

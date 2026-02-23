@@ -1,10 +1,20 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { TicTacToeContext } from '../context/TicTacToeContext';
+import { useLocation } from 'react-router-dom';
+import { ShipsContext } from '../context/ShipsContext';
 
 function Chat() {
+  const location = useLocation();
+  const Ttx = useContext(TicTacToeContext);
+  const Shpx = useContext(ShipsContext);
+
+  // console.log(location.pathname, "path");
+
   const { socketRef, chat, setChat, user, disableChat } =
-    useContext(TicTacToeContext);
+    location.pathname === '/ships' ? Shpx : Ttx;
+
+    console.log(user, "user");
   const [inputDisplay, setInputDisplay] = useState('');
   const [message, setMessage] = useState({ sender: null, message: null });
   const messagesEndRef = useRef(null);

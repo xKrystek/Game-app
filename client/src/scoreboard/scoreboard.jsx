@@ -1,8 +1,13 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useContext, useEffect } from 'react';
 import { TicTacToeContext } from '../context/TicTacToeContext';
+import { useLocation } from 'react-router-dom';
+import { ShipsContext } from '../context/ShipsContext';
 
 function Scoreboard() {
+  const location = useLocation();
+  const Ttx = useContext(TicTacToeContext);
+  const Shpx = useContext(ShipsContext);
   const {
     playersUsernamesList,
     socketRef,
@@ -14,14 +19,16 @@ function Scoreboard() {
     setRematchOponent,
     yourScore,
     oponentScore
-  } = useContext(TicTacToeContext);
+  } = location.pathname === '/ships' ? Shpx : Ttx;
+
+  console.log(playersUsernamesList, "list");
 
   useEffect(() => {
     if (rematchYou && rematchOponent) {
       setRematch(false);
       setRematchOponent(false);
       setRematchYou(false);
-    }
+  }
   }, [rematchYou, rematchOponent]);
 
   return (

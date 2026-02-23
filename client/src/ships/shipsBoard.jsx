@@ -15,7 +15,7 @@ function ShipsBoard() {
     if (boardRef.current) {
       setBoardRect(boardRef.current.getBoundingClientRect());
     }
-  }, []);
+  }, [window.innerHeight, window.innerWidth]);
 
 const onDropShip = useCallback(
   (ship) => {

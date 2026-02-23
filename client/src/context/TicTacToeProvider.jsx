@@ -239,25 +239,7 @@ function TicTacToeProvider({ children }) {
       });
     }
 
-    if (location.pathname === '/ships') {
-      socketRef.current = io(`${BACKEND_URL}/ships`);
-
-      setDisableChat(false);
-
-      // --- CONNECT EVENT ---
-      socketRef.current.on('connect', () => {
-        setSocketId(socketRef.current.id);
-      });
-
-      // --- LISTENERS ---
-      socketRef.current.on('listOfUsernames', (usernamesFromBackend) => {
-        setPlayersUsernamesList(usernamesFromBackend);
-      });
-
-      socketRef.current.on('send-message', (fullchat) => {
-        setChat(fullchat);
-      });
-    }
+    
 
     // 🧹 CLEANUP
     return () => {
@@ -297,17 +279,7 @@ function TicTacToeProvider({ children }) {
         socketRef.current?.disconnect();
         socketRef.current = null;
       }
-      if (location.pathname === '/ships') {
-        // setYourTurn(undefined);
-        // setDisableChat(false);
-        // setRematch(false);
-        // setRematchOponent(false);
-        // setRematchYou(false);
-        // setDisplayScoreBoard(false);
-        // setYourScore(0);
-        // setOponentScore(0);
-        // setDisplayBtn(false);
-      }
+      
     };
   }, [location.pathname]);
 
