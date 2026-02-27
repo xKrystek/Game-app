@@ -253,8 +253,9 @@ SHIPS.on("connection", (socket) => {
       usernamesList[roomToJoin].push(listOfUsernames);
     } else {
       // eslint-disable-next-line array-callback-return, no-useless-return
-      usernamesList[roomToJoin].map((x) => {
-        if (x[0] === listOfUsernames[0]) return (x[1] = listOfUsernames[1]);
+      // updates socket id :)))
+      usernamesList[roomToJoin].forEach((x) => {
+        if (x[0] === listOfUsernames[0]) x[1] = listOfUsernames[1];
       });
     }
     SHIPS.to(roomToJoin).emit(

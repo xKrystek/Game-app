@@ -1,6 +1,9 @@
-import { memo, useEffect, useRef, useState } from 'react';
+import { memo, useContext, useEffect, useRef, useState } from 'react';
+import { ShipsContext } from '../context/ShipsContext';
 
 const SHIPS = ['1', '2', '3', '4', '5', '6'];
+
+const PlacedShips = [];
 
 const ShipsContainer = memo(function ShipsContainer({
   onDropShip,
@@ -11,6 +14,8 @@ const ShipsContainer = memo(function ShipsContainer({
   const draggingRef = useRef(null);
   const offsetRef = useRef({ x: 0, y: 0 });
   const startPosRef = useRef({ x: 0, y: 0 });
+
+  const { setShipsPlaced } = useContext(ShipsContext);
 
   const pendingHighlightRef = useRef(null);
 
@@ -95,6 +100,9 @@ const ShipsContainer = memo(function ShipsContainer({
         if (!snap) return prev;
 
         pendingHighlightRef.current = { id, cells: snap.cells };
+        PlacedShips.push(ship);
+
+        if(PlacedShips.length === 6) setShipsPlaced(true);
 
         return {
           ...prev,

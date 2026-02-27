@@ -53,6 +53,8 @@ function ShipsProvider({ children }) {
   const [storedCurrentSidsIndex, setStoredCurrentSidsIndex] = useState(null);
   const [storedOtherSidsIndex, setStoredOtherSidsIndex] = useState(null);
   const [gameOver, setGameOver] = useState(false);
+  const [startPlacing, setStartPlacing] = useState(false);
+  const [shipsPlaced, setShipsPlaced] = useState(false);
 
   // -----------------------------
   // 🟠 CHAT STATE
@@ -131,6 +133,10 @@ function ShipsProvider({ children }) {
       // --- LISTENERS ---
       socketRef.current.on('listOfUsernames', (usernamesFromBackend) => {
         setPlayersUsernamesList(usernamesFromBackend);
+        if(usernamesFromBackend.length > 1) {
+          setDisableChat(false);
+          setStartPlacing(true);
+        }
       });
 
       socketRef.current.on('send-message', (fullchat) => {
@@ -212,6 +218,10 @@ function ShipsProvider({ children }) {
     }
   }, [user, socketId]);
 
+  useEffect(() => {
+    setStartPlacing(false);
+  }, [shipsPlaced])
+
   return (
     <ShipsContext.Provider
       value={{
@@ -256,7 +266,9 @@ function ShipsProvider({ children }) {
         yourScore,
         setYourScore,
         oponentScore,
-        setOponentScore
+        setOponentScore,
+        startPlacing,
+        setShipsPlaced
       }}
     >
       {children}

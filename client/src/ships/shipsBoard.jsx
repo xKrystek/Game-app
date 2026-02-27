@@ -6,10 +6,12 @@ import { ShipsContext } from '../context/ShipsContext.jsx';
 
 function ShipsBoard() {
   const navigate = useNavigate();
-  const { highlighted, setHighlighted } = useContext(ShipsContext);
+  const { highlighted, setHighlighted, startPlacing } = useContext(ShipsContext);
 
   const boardRef = useRef(null);
   const [boardRect, setBoardRect] = useState(null);
+
+  console.log(startPlacing, "placing");
 
   useLayoutEffect(() => {
     if (boardRef.current) {
@@ -103,6 +105,7 @@ const onDropShip = useCallback(
             />
           );
         })}
+        {startPlacing ? <p className='-top-10 left-1/2 -translate-y-1/2 -translate-x-1/2 absolute'>Place ships</p> : null}
       </div>
 
       {boardRect && (
