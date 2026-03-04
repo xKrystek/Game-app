@@ -25,6 +25,7 @@ function CommonForm({ formControls = [], form, buttonText, handleSubmit }) {
                   onChange={field.onChange}
                   value={field.value}
                   className="border-2 border-gray-500 rounded-[6px] p-2"
+                  // autoComplete='off'
                 />
               )}
             ></Controller>

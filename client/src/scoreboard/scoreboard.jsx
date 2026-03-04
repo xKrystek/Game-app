@@ -21,7 +21,7 @@ function Scoreboard() {
     oponentScore
   } = location.pathname === '/ships' ? Shpx : Ttx;
 
-  console.log(playersUsernamesList, "list");
+  // console.log(playersUsernamesList, "list");
 
   useEffect(() => {
     if (rematchYou && rematchOponent) {

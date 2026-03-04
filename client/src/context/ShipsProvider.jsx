@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { ShipsContext } from './ShipsContext';
-import { useLocation, useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import GameCheck from '../board/game-check/TTTGameCheck';
+import { AuthContext } from './AuthContext';
 
 const getBackendUrl = () => {
   if (typeof window !== 'undefined') {
@@ -16,36 +16,18 @@ const getBackendUrl = () => {
 const BACKEND_URL = getBackendUrl();
 
 function ShipsProvider({ children }) {
-  const [highlighted, setHighlighted] = useState({
-    1: [],
-    2: [],
-    3: [],
-    4: [],
-    5: [],
-    6: []
-  });
-
-  const [board, setBoard] = useState(() =>
-    Array.from({ length: 100 }).reduce((acc, curr, index) => {
-      acc[index] = '';
-      return acc;
-    }, {})
-  );
-
   // -----------------------------
   // 🟣 AUTH & NAVIGATION STATE
   // -----------------------------
   const [LoggingView, setLoggingView] = useState(true);
   const [loading, setLoading] = useState(true);
-  const location = useLocation();
-  const navigate = useNavigate();
+  const { user } = useContext(AuthContext);
 
   // -----------------------------
   // 🔵 GAME STATE
   // -----------------------------
   const [player, setPlayer] = useState(false);
   const [yourTurn, setYourTurn] = useState(undefined);
-  const [user, setUser] = useState(null);
   const [win, setWin] = useState(false);
   const [tie, setTie] = useState(false);
   const [displayBtn, setDisplayBtn] = useState(false);
@@ -55,6 +37,20 @@ function ShipsProvider({ children }) {
   const [gameOver, setGameOver] = useState(false);
   const [startPlacing, setStartPlacing] = useState(false);
   const [shipsPlaced, setShipsPlaced] = useState(false);
+  const [highlighted, setHighlighted] = useState({
+    1: [],
+    2: [],
+    3: [],
+    4: [],
+    5: [],
+    6: []
+  });
+  const [board, setBoard] = useState(() =>
+    Array.from({ length: 100 }).reduce((acc, curr, index) => {
+      acc[index] = '';
+      return acc;
+    }, {})
+  );
 
   // -----------------------------
   // 🟠 CHAT STATE
@@ -89,38 +85,6 @@ function ShipsProvider({ children }) {
   }, [socketId]);
 
   useEffect(() => {
-    // 🪪 Verify User
-    const verifyCookie = async () => {
-      console.log('called');
-      const response = await callUserAuthApi();
-      console.log(response, 'response');
-
-      if (response?.userCredentials) {
-        console.log(response.userCredentials, 'credentials');
-        setUser(response?.userCredentials.username);
-        sessionStorage.setItem('username', response?.userCredentials.username);
-      }
-
-      return response?.success
-        ? navigate(
-            location.pathname === '/' || location.pathname === '/auth'
-              ? '/games'
-              : `${location.pathname}`,
-            { replace: false }
-          )
-        : navigate('/auth');
-    };
-
-    if (!sessionStorage.getItem('username')) verifyCookie();
-    else {
-      setUser(sessionStorage.getItem('username'));
-      navigate(
-        location.pathname === '/' || location.pathname === '/auth'
-          ? '/games'
-          : `${location.pathname}`
-      );
-    }
-
     // 🎮 SOCKET SETUP — only on game route
     if (location.pathname === '/ships') {
       socketRef.current = io(`${BACKEND_URL}/ships`);
@@ -133,7 +97,7 @@ function ShipsProvider({ children }) {
       // --- LISTENERS ---
       socketRef.current.on('listOfUsernames', (usernamesFromBackend) => {
         setPlayersUsernamesList(usernamesFromBackend);
-        if(usernamesFromBackend.length > 1) {
+        if (usernamesFromBackend.length > 1) {
           setDisableChat(false);
           setStartPlacing(true);
         }
@@ -220,7 +184,7 @@ function ShipsProvider({ children }) {
 
   useEffect(() => {
     setStartPlacing(false);
-  }, [shipsPlaced])
+  }, [shipsPlaced]);
 
   return (
     <ShipsContext.Provider
@@ -230,8 +194,6 @@ function ShipsProvider({ children }) {
         board,
         setBoard,
         player,
-        user,
-        setUser,
         loading,
         setLoading,
         LoggingView,
@@ -253,7 +215,6 @@ function ShipsProvider({ children }) {
         gameOver,
         setGameOver,
         disableChat,
-        navigate,
         rematch,
         setRematch,
         playersUsernamesList,

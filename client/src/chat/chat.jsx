@@ -3,6 +3,7 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import { TicTacToeContext } from '../context/TicTacToeContext';
 import { useLocation } from 'react-router-dom';
 import { ShipsContext } from '../context/ShipsContext';
+import { AuthContext } from '../context/AuthContext';
 
 function Chat() {
   const location = useLocation();
@@ -11,10 +12,11 @@ function Chat() {
 
   // console.log(location.pathname, "path");
 
-  const { socketRef, chat, setChat, user, disableChat } =
+  const { user } = useContext(AuthContext);
+  const { socketRef, chat, setChat, disableChat } =
     location.pathname === '/ships' ? Shpx : Ttx;
 
-    console.log(user, "user");
+  // console.log(user, "user");
   const [inputDisplay, setInputDisplay] = useState('');
   const [message, setMessage] = useState({ sender: null, message: null });
   const messagesEndRef = useRef(null);

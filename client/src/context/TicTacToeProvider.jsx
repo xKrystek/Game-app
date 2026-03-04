@@ -1,10 +1,9 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useEffect, useState, useRef, useCallback } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { callUserAuthApi } from '../services/apiCalls';
+import { useEffect, useState, useRef, useCallback, useContext } from 'react';
 import { io } from 'socket.io-client';
 import GameCheck from '../board/game-check/TTTGameCheck';
 import { TicTacToeContext } from './TicTacToeContext';
+import { AuthContext } from './AuthContext';
 
 const getBackendUrl = () => {
   if (typeof window !== 'undefined') {
@@ -38,15 +37,13 @@ function TicTacToeProvider({ children }) {
   // -----------------------------
   const [LoggingView, setLoggingView] = useState(true);
   const [loading, setLoading] = useState(true);
-  const location = useLocation();
-  const navigate = useNavigate();
+  const {user} = useContext(AuthContext)
 
   // -----------------------------
   // 🔵 GAME STATE
   // -----------------------------
   const [player, setPlayer] = useState(false);
   const [yourTurn, setYourTurn] = useState(undefined);
-  const [user, setUser] = useState(null);
   const [win, setWin] = useState(false);
   const [tie, setTie] = useState(false);
   const [displayBtn, setDisplayBtn] = useState(false);
@@ -118,38 +115,6 @@ function TicTacToeProvider({ children }) {
   // 🧠 MAIN EFFECT — AUTH + SOCKET SETUP
   // -----------------------------
   useEffect(() => {
-    // 🪪 Verify User
-    const verifyCookie = async () => {
-      console.log('called');
-      const response = await callUserAuthApi();
-      console.log(response, 'response');
-
-      if (response?.userCredentials) {
-        console.log(response.userCredentials, 'credentials');
-        setUser(response?.userCredentials.username);
-        sessionStorage.setItem('username', response?.userCredentials.username);
-      }
-
-      return response?.success
-        ? navigate(
-            location.pathname === '/' || location.pathname === '/auth'
-              ? '/games'
-              : `${location.pathname}`,
-            { replace: false }
-          )
-        : navigate('/auth');
-    };
-
-    if (!sessionStorage.getItem('username')) verifyCookie();
-    else {
-      setUser(sessionStorage.getItem('username'));
-      navigate(
-        location.pathname === '/' || location.pathname === '/auth'
-          ? '/games'
-          : `${location.pathname}`
-      );
-    }
-
     // 🎮 SOCKET SETUP — only on game route
     if (location.pathname === '/tic-tac-toe') {
       socketRef.current = io(`${BACKEND_URL}/tic-tac-toe`);
@@ -302,7 +267,6 @@ function TicTacToeProvider({ children }) {
         setBoard,
         player,
         user,
-        setUser,
         loading,
         setLoading,
         LoggingView,
@@ -325,7 +289,6 @@ function TicTacToeProvider({ children }) {
         gameOver,
         setGameOver,
         disableChat,
-        navigate,
         rematch,
         setRematch,
         playersUsernamesList,

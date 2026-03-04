@@ -11,7 +11,7 @@ function ShipsBoard() {
   const boardRef = useRef(null);
   const [boardRect, setBoardRect] = useState(null);
 
-  console.log(startPlacing, "placing");
+  // console.log(startPlacing, "placing");
 
   useLayoutEffect(() => {
     if (boardRef.current) {
