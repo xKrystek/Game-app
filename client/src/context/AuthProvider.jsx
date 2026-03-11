@@ -26,9 +26,9 @@ function AuthProvider({ children }) {
             location.pathname === '/' || location.pathname === '/auth'
               ? '/games'
               : `${location.pathname}`,
-            { replace: false }
+            { replace: true }
           )
-        : navigate('/auth');
+        : navigate('/auth', { replace: true });
     };
 
     if (!sessionStorage.getItem('username')) verifyCookie();
@@ -37,15 +37,16 @@ function AuthProvider({ children }) {
       navigate(
         location.pathname === '/' || location.pathname === '/auth'
           ? '/games'
-          : `${location.pathname}`
+          : `${location.pathname}`,
+        { replace: true }
       );
     }
+
+    console.log(window.history);
   }, [location.pathname]);
 
   return (
-    <AuthContext.Provider value={{ user }}>
-      {children}
-    </AuthContext.Provider>
+    <AuthContext.Provider value={{ user }}>{children}</AuthContext.Provider>
   );
 }
 

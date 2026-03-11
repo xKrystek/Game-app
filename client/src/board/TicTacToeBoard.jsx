@@ -26,7 +26,7 @@ function Board() {
   const navigate = useNavigate();
 
   const handleLogoutUser = () => {
-    callLogoutUser().then(() => navigate('/auth'));
+    callLogoutUser().then(() => navigate('/auth', {replace: true}));
   };
 
   useEffect(() => {

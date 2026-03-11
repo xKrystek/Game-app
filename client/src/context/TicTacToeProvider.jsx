@@ -231,16 +231,6 @@ function TicTacToeProvider({ children }) {
         setDisplayBtn(false);
         setGameOver(false);
 
-        socketRef.current.off('score');
-        socketRef.current.off('play-again');
-        socketRef.current.off('send-message');
-        socketRef.current.off('rematch');
-        socketRef.current.off('playerValues');
-        socketRef.current.off('playerDisconnect');
-        socketRef.current.off('listOfUsernames');
-        socketRef.current.off('connect');
-        socketRef.current.off('player-move');
-
         socketRef.current?.disconnect();
         socketRef.current = null;
       }

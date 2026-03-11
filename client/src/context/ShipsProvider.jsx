@@ -36,7 +36,7 @@ function ShipsProvider({ children }) {
   const [storedOtherSidsIndex, setStoredOtherSidsIndex] = useState(null);
   const [gameOver, setGameOver] = useState(false);
   const [startPlacing, setStartPlacing] = useState(false);
-  const [shipsPlaced, setShipsPlaced] = useState(false);
+  const [shipsPlacedBool, setShipsPlacedBool] = useState(false);
   const [highlighted, setHighlighted] = useState({
     1: [],
     2: [],
@@ -183,8 +183,13 @@ function ShipsProvider({ children }) {
   }, [user, socketId]);
 
   useEffect(() => {
-    setStartPlacing(false);
-  }, [shipsPlaced]);
+    let result;
+    shipsPlacedBool ? result = Object.values(highlighted).every((x) => x.length > 0) : null;
+    if (shipsPlacedBool && result) {
+      setStartPlacing(false);
+      socketRef.current.emit('playerShipsPlacement', [highlighted, socketId])
+    }
+  }, [shipsPlacedBool, highlighted, socketId]);
 
   return (
     <ShipsContext.Provider
@@ -229,7 +234,7 @@ function ShipsProvider({ children }) {
         oponentScore,
         setOponentScore,
         startPlacing,
-        setShipsPlaced
+        setShipsPlacedBool
       }}
     >
       {children}

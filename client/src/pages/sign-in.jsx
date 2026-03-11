@@ -23,7 +23,7 @@ function SignIn() {
       if (response?.success) {
         formData.reset();
         setError(null); // Clear error if any
-        navigate('/games');
+        navigate('/games', {replace: true});
       } else {
         setError(response?.response?.data.message || 'Something went wrong.');
       }

@@ -82,7 +82,7 @@ const onDropShip = useCallback(
   return (
     <>
       <button
-        onClick={() => callLogoutUser().then(() => navigate('/auth'))}
+        onClick={() => callLogoutUser().then(() => navigate('/auth', {replace: true}))}
         className="fixed top-0 left-0 m-2"
       >
         LogOut

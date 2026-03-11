@@ -24,7 +24,7 @@ function SignUp() {
       if (response?.success) {
         formData.reset();
         setError(null); // Clear error if any
-        navigate('/');
+        navigate('/', {replace: true});
       } else {
         setError(response.response.data.message || 'Something went wrong.');
       }

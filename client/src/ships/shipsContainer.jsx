@@ -24,7 +24,7 @@ const ShipsContainer = memo(function ShipsContainer({
   const frameRef = useRef(null);
   const latestEventRef = useRef(null);
 
-  const { setShipsPlaced, shipsPlaced } = useContext(ShipsContext);
+  const { setShipsPlacedBool, shipsPlacedBool } = useContext(ShipsContext);
 
   const pendingHighlightRef = useRef(null);
 
@@ -220,13 +220,13 @@ const ShipsContainer = memo(function ShipsContainer({
 
   useLayoutEffect(() => {
     if (PlacedShips.length === 6) {
-      setShipsPlaced(true);
+      setShipsPlacedBool(true);
     }
   }, [PlacedShips.length]);
 
   return (
     <>
-      {shipsPlaced
+      {shipsPlacedBool
         ? null
         : SHIPS.map((id) => {
             const ship = ships[id];
