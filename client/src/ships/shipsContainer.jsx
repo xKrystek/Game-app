@@ -24,7 +24,7 @@ const ShipsContainer = memo(function ShipsContainer({
   const frameRef = useRef(null);
   const latestEventRef = useRef(null);
 
-  const { setShipsPlacedBool, shipsPlacedBool } = useContext(ShipsContext);
+  const { setShipsPlacedBool, shipsPlacedBool, socketRef, highlighted, socketId } = useContext(ShipsContext);
 
   const pendingHighlightRef = useRef(null);
 
@@ -221,6 +221,7 @@ const ShipsContainer = memo(function ShipsContainer({
   useLayoutEffect(() => {
     if (PlacedShips.length === 6) {
       setShipsPlacedBool(true);
+      socketRef.current.emit("shipsPlaced", highlighted, socketId);
     }
   }, [PlacedShips.length]);
 

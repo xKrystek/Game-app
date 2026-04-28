@@ -1,22 +1,22 @@
-function assignPlayerValuesAndEmitShips(SHIPS, SHIPS_PLACEMENT, roomToJoin, socket) {
-  if (SHIPS.adapter.rooms.get(roomToJoin).size === 2) {
+function assignPlayerValuesAndEmitShips(
+  SHIPS,
+  SHIPS_PLACEMENT,
+  roomToJoin,
+  socket,
+  receivedShipsPositions,
+  frontend_id
+) {
+  if (!SHIPS_PLACEMENT[roomToJoin]) SHIPS_PLACEMENT[roomToJoin] = {};
 
-    SHIPS.adapter.rooms.get(roomToJoin).forEach((sid) => {
-      if (socket.id === sid) {
-        SHIPS_PLACEMENT[roomToJoin] = [
-          socket.id,
-          [
-            pickRandomSymbol,
-            // true or false :))) ⬇️
-            pickRandomSymbol === "O"
-          ]
-        ];
-      } else {
-        //                                        true or false :))) ⬇️
-        SHIPS_PLACEMENT[roomToJoin] = [sid, [Symbols[0], Symbols[0] === "O"]];
-      }
-    });
-  }
+  console.log(frontend_id);
+
+  SHIPS.adapter.rooms.get(roomToJoin).forEach((sid) => {
+    console.log("works");
+    frontend_id === sid ? SHIPS_PLACEMENT[roomToJoin][sid] = receivedShipsPositions : null;
+  });
+
+  console.log(SHIPS_PLACEMENT[roomToJoin]);
+  SHIPS.to(roomToJoin).emit("Players_Ships_Placement", SHIPS_PLACEMENT[roomToJoin]);
 }
 
 module.exports = assignPlayerValuesAndEmitShips;

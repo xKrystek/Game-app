@@ -42,7 +42,8 @@ function AuthProvider({ children }) {
       );
     }
 
-    console.log(window.history);
+    // Window history
+    // console.log(window.history);
   }, [location.pathname]);
 
   return (

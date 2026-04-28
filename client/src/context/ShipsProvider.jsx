@@ -133,6 +133,10 @@ function ShipsProvider({ children }) {
         }
       });
 
+      socketRef.current.on("Players_Ships_Placement", (shipsPlacements) => {
+        console.log(shipsPlacements, "ships placements");
+      })
+
       socketRef.current.on('playerDisconnect', () => {
         setYourTurn(undefined);
         setDisableChat(false);
@@ -205,6 +209,7 @@ function ShipsProvider({ children }) {
         setLoggingView,
         location,
         socketRef,
+        socketId,
         chat,
         setChat,
         playAgainButton,
@@ -234,7 +239,7 @@ function ShipsProvider({ children }) {
         oponentScore,
         setOponentScore,
         startPlacing,
-        setShipsPlacedBool
+        setShipsPlacedBool,
       }}
     >
       {children}

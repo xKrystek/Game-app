@@ -12,6 +12,7 @@ const healthCheck = require("./controllers/status-check.js");
 const scoreHandler = require("./scripts/scoreHandler.js");
 const GameCheck = require("./scripts/TTTGameCheck.js");
 const assignPlayerValuesAndEmitShips = require("./scripts/ShipsPlayerValues.js");
+const uuid = require("uuid");
 
 const app = express();
 require("./database/db.js");
@@ -260,8 +261,8 @@ SHIPS.on("connection", (socket) => {
 
   rematchHandler(SHIPS, rematchState, roomToJoin, socket);
 
-  socket.on("shipsPlaced", (receivedShipsPositions, id) => {
-    assignPlayerValuesAndEmitShips(SHIPS, SHIPS_PLACEMENT, roomToJoin, socket, receivedShipsPositions, id);
+  socket.on("shipsPlaced", (receivedShipsPositions, frontend_id) => {
+    assignPlayerValuesAndEmitShips(SHIPS, SHIPS_PLACEMENT, roomToJoin, socket, receivedShipsPositions, frontend_id);
   })
 
   socket.on("listOfUsernames", (listOfUsernames) => {
@@ -312,6 +313,7 @@ SHIPS.on("connection", (socket) => {
       delete gameState[roomToJoin];
       delete usernamesList[roomToJoin];
       delete rematchState[roomToJoin];
+      delete SHIPS_PLACEMENT[roomToJoin];
     } else {
       SHIPS.to(roomToJoin).emit("send-message", (fullChat[roomToJoin] = []));
       SHIPS.to(roomToJoin).emit("play-again", {}, false);
@@ -340,7 +342,7 @@ if (require.main === module) {
   httpserver.listen(PORT, () => {
     console.log(`App is listening on PORT ${PORT}`);
     //Sqlite Db open status check
-    console.log(database.isOpen ? "Sqlite database is working" : "Sqlite database is not working");
+    // console.log(database.isOpen ? "Sqlite database is working" : "Sqlite database is not working");
   });
 }
 
