@@ -5,10 +5,10 @@ import {
   useLayoutEffect,
   useRef,
   useState
-} from 'react';
-import { ShipsContext } from '../context/ShipsContext';
+} from "react";
+import { ShipsContext } from "../context/ShipsContext";
 
-const SHIPS = ['1', '2', '3', '4', '5', '6'];
+const SHIPS = ["1", "2", "3", "4", "5", "6"];
 
 const PlacedShips = [];
 
@@ -24,7 +24,14 @@ const ShipsContainer = memo(function ShipsContainer({
   const frameRef = useRef(null);
   const latestEventRef = useRef(null);
 
-  const { setShipsPlacedBool, shipsPlacedBool, socketRef, highlighted, socketId } = useContext(ShipsContext);
+  const {
+    setShipsPlacedBool,
+    shipsPlacedBool,
+    socketRef,
+    highlighted,
+    socketId,
+    visibility
+  } = useContext(ShipsContext);
 
   const pendingHighlightRef = useRef(null);
 
@@ -42,7 +49,7 @@ const ShipsContainer = memo(function ShipsContainer({
           x: (window.innerWidth * 90) / 100,
           y: window.innerHeight / 2
         },
-        orientation: 'vertical',
+        orientation: "vertical",
         rotation: 0,
         length: parseInt(id)
       };
@@ -144,12 +151,12 @@ const ShipsContainer = memo(function ShipsContainer({
       cancelAnimationFrame(frameRef.current);
     }
 
-    window.addEventListener('mousemove', onMouseMove);
-    window.addEventListener('mouseup', onMouseUp);
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
 
     return () => {
-      window.removeEventListener('mousemove', onMouseMove);
-      window.removeEventListener('mouseup', onMouseUp);
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
     };
   }, [onDropShip]);
 
@@ -159,7 +166,7 @@ const ShipsContainer = memo(function ShipsContainer({
       const rotated = {
         ...ship,
         orientation:
-          ship.orientation === 'vertical' ? 'horizontal' : 'vertical',
+          ship.orientation === "vertical" ? "horizontal" : "vertical",
         rotation: (ship.rotation + 90) % 360
       };
 
@@ -201,12 +208,12 @@ const ShipsContainer = memo(function ShipsContainer({
         return { ...prev };
       });
     }
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
 
     // console.log(ships['6'].center.x, 'ship center x after');
 
     return () => {
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener("resize", handleResize);
     };
   }, [window.innerHeight, window.innerWidth]);
 
@@ -220,16 +227,14 @@ const ShipsContainer = memo(function ShipsContainer({
 
   useLayoutEffect(() => {
     if (PlacedShips.length === 6) {
-      setShipsPlacedBool(true);
+      setShipsPlacedBool(prev => ({...prev, [socketId]: true}));
       socketRef.current.emit("shipsPlaced", highlighted, socketId);
     }
   }, [PlacedShips.length]);
 
   return (
     <>
-      {shipsPlacedBool
-        ? null
-        : SHIPS.map((id) => {
+        {SHIPS.map((id) => {
             const ship = ships[id];
             const cellW = WIDTH / 10;
             const cellH = HEIGHT / 10;
@@ -240,15 +245,15 @@ const ShipsContainer = memo(function ShipsContainer({
                 onMouseDown={(e) => handleMouseDown(e, id)}
                 onDoubleClick={() => handleRotate(id)}
                 style={{
-                  position: 'absolute',
+                  position: "absolute",
                   left: ship.center.x,
                   top: ship.center.y,
                   width: cellW - 2,
                   height: ship.length * cellH - 2,
                   transform: `translate(-50%, -50%) rotate(${ship.rotation}deg)`,
-                  border: '1px solid #fbbf24',
-                  cursor: 'grab',
-                  userSelect: 'none'
+                  border: "1px solid #fbbf24",
+                  cursor: "grab",
+                  visibility: `${visibility}`
                 }}
                 className="ship"
               >

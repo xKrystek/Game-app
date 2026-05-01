@@ -1,17 +1,17 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useEffect, useState, useRef, useCallback, useContext } from 'react';
-import { io } from 'socket.io-client';
-import GameCheck from '../board/game-check/TTTGameCheck';
-import { TicTacToeContext } from './TicTacToeContext';
-import { AuthContext } from './AuthContext';
+import { useEffect, useState, useRef, useCallback, useContext } from "react";
+import { io } from "socket.io-client";
+import GameCheck from "../tictactoe/game-check/TTTGameCheck";
+import { TicTacToeContext } from "./TicTacToeContext";
+import { AuthContext } from "./AuthContext";
 
 const getBackendUrl = () => {
-  if (typeof window !== 'undefined') {
+  if (typeof window !== "undefined") {
     const host = window.location.hostname; // 'localhost' or '192.168.1.173'
     return `http://${host}:5000`;
   }
   // fallback
-  return 'http://localhost:5000';
+  return "http://localhost:5000";
 };
 
 const BACKEND_URL = getBackendUrl();
@@ -21,15 +21,15 @@ function TicTacToeProvider({ children }) {
   // 🟢 BOARD STATE
   // -----------------------------
   const [board, setBoard] = useState({
-    one: '',
-    two: '',
-    three: '',
-    four: '',
-    five: '',
-    six: '',
-    seven: '',
-    eight: '',
-    nine: ''
+    one: "",
+    two: "",
+    three: "",
+    four: "",
+    five: "",
+    six: "",
+    seven: "",
+    eight: "",
+    nine: ""
   });
 
   // -----------------------------
@@ -37,7 +37,7 @@ function TicTacToeProvider({ children }) {
   // -----------------------------
   const [LoggingView, setLoggingView] = useState(true);
   const [loading, setLoading] = useState(true);
-  const {user} = useContext(AuthContext)
+  const { user } = useContext(AuthContext);
 
   // -----------------------------
   // 🔵 GAME STATE
@@ -80,7 +80,7 @@ function TicTacToeProvider({ children }) {
   // -----------------------------
   const handleBoardOnClick = useCallback(
     (event) => {
-      const cellDiv = event.target.closest('[data-cell]');
+      const cellDiv = event.target.closest("[data-cell]");
       if (!cellDiv) return;
 
       const cell = cellDiv.dataset.cell;
@@ -93,7 +93,7 @@ function TicTacToeProvider({ children }) {
       storedInfo[storedOtherSidsIndex][1][1] =
         !storedInfo[storedOtherSidsIndex][1][1];
 
-      socketRef.current.emit('player-move', updatedBoard, storedInfo);
+      socketRef.current.emit("player-move", updatedBoard, storedInfo);
     },
     [
       board,
@@ -106,9 +106,9 @@ function TicTacToeProvider({ children }) {
   );
 
   const playAgainButton = useCallback(() => {
-    socketRef.current.emit('play-again');
+    socketRef.current.emit("play-again");
     setDisplayBtn(false);
-    socketRef.current.emit('rematch', [socketId, true]);
+    socketRef.current.emit("rematch", [socketId, true]);
   }, [socketId]);
 
   // -----------------------------
@@ -116,28 +116,28 @@ function TicTacToeProvider({ children }) {
   // -----------------------------
   useEffect(() => {
     // 🎮 SOCKET SETUP — only on game route
-    if (location.pathname === '/tic-tac-toe') {
+    if (location.pathname === "/tic-tac-toe") {
       socketRef.current = io(`${BACKEND_URL}/tic-tac-toe`);
 
       // --- CONNECT EVENT ---
-      socketRef.current.on('connect', () => {
+      socketRef.current.on("connect", () => {
         setSocketId(socketRef.current.id);
       });
 
       // --- LISTENERS ---
-      socketRef.current.on('listOfUsernames', (usernamesFromBackend) => {
+      socketRef.current.on("listOfUsernames", (usernamesFromBackend) => {
         setPlayersUsernamesList(usernamesFromBackend);
       });
 
-      socketRef.current.on('send-message', (fullchat) => {
+      socketRef.current.on("send-message", (fullchat) => {
         setChat(fullchat);
       });
 
-      socketRef.current.on('player-move', (board) => {
+      socketRef.current.on("player-move", (board) => {
         setBoard(board);
       });
 
-      socketRef.current.on('playerValues', (playerValues) => {
+      socketRef.current.on("playerValues", (playerValues) => {
         setStoredInfo(playerValues);
 
         let temporaryArray = [];
@@ -164,33 +164,33 @@ function TicTacToeProvider({ children }) {
         }
       });
 
-      socketRef.current.on('play-again', (board) => {
+      socketRef.current.on("play-again", (board) => {
         setBoard(board);
         setWin(false);
         setTie(false);
         setGameOver(false);
       });
 
-      socketRef.current.on('rematch', (playersRematchDecisions) => {
+      socketRef.current.on("rematch", (playersRematchDecisions) => {
         playersRematchDecisions.forEach((val) => {
           if (val[0] === socketRef.current.id) setRematchYou(val[1]);
           else setRematchOponent(val[1]);
         });
       });
 
-      socketRef.current.on('win', (score) => {
+      socketRef.current.on("win", (score) => {
         for (const key in score) {
           if (key === socketRef.current?.id) setYourScore(score[key]);
         }
       });
 
-      socketRef.current.on('lose', (score) => {
+      socketRef.current.on("lose", (score) => {
         for (const key in score) {
           if (key !== socketRef.current?.id) setOponentScore(score[key]);
         }
       });
 
-      socketRef.current.on('playerDisconnect', () => {
+      socketRef.current.on("playerDisconnect", () => {
         setYourTurn(undefined);
         setDisableChat(false);
         setRematch(false);
@@ -204,21 +204,19 @@ function TicTacToeProvider({ children }) {
       });
     }
 
-    
-
     // 🧹 CLEANUP
     return () => {
-      if (location.pathname === '/tic-tac-toe') {
+      if (location.pathname === "/tic-tac-toe") {
         setBoard({
-          one: '',
-          two: '',
-          three: '',
-          four: '',
-          five: '',
-          six: '',
-          seven: '',
-          eight: '',
-          nine: ''
+          one: "",
+          two: "",
+          three: "",
+          four: "",
+          five: "",
+          six: "",
+          seven: "",
+          eight: "",
+          nine: ""
         });
         setYourTurn(undefined);
         setDisableChat(false);
@@ -234,7 +232,6 @@ function TicTacToeProvider({ children }) {
         socketRef.current?.disconnect();
         socketRef.current = null;
       }
-      
     };
   }, [location.pathname]);
 
@@ -243,7 +240,7 @@ function TicTacToeProvider({ children }) {
   // -----------------------------
   useEffect(() => {
     if (user && socketId) {
-      socketRef.current?.emit('listOfUsernames', [user, socketRef.current?.id]);
+      socketRef.current?.emit("listOfUsernames", [user, socketRef.current?.id]);
     }
   }, [user, socketId]);
 

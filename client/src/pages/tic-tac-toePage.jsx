@@ -1,7 +1,7 @@
-import React from 'react';
-import Board from '../board/TicTacToeBoard';
-import Chat from '../chat/chat';
-import Scoreboard from '../scoreboard/scoreboard';
+import React from "react";
+import Board from "../tictactoe/TicTacToeBoard";
+import Chat from "../chat/chat";
+import Scoreboard from "../scoreboard/scoreboard";
 
 function TicTacToePage() {
   return (

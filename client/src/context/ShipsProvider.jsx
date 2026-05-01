@@ -1,16 +1,16 @@
-import { useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { ShipsContext } from './ShipsContext';
-import { io } from 'socket.io-client';
-import GameCheck from '../board/game-check/TTTGameCheck';
-import { AuthContext } from './AuthContext';
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { ShipsContext } from "./ShipsContext";
+import { io } from "socket.io-client";
+import GameCheck from "../tictactoe/game-check/TTTGameCheck";
+import { AuthContext } from "./AuthContext";
 
 const getBackendUrl = () => {
-  if (typeof window !== 'undefined') {
+  if (typeof window !== "undefined") {
     const host = window.location.hostname; // 'localhost' or '192.168.1.173'
     return `http://${host}:5000`;
   }
   // fallback
-  return 'http://localhost:5000';
+  return "http://localhost:5000";
 };
 
 const BACKEND_URL = getBackendUrl();
@@ -31,12 +31,14 @@ function ShipsProvider({ children }) {
   const [win, setWin] = useState(false);
   const [tie, setTie] = useState(false);
   const [displayBtn, setDisplayBtn] = useState(false);
-  const [storedInfo, setStoredInfo] = useState(null);
   const [storedCurrentSidsIndex, setStoredCurrentSidsIndex] = useState(null);
   const [storedOtherSidsIndex, setStoredOtherSidsIndex] = useState(null);
   const [gameOver, setGameOver] = useState(false);
   const [startPlacing, setStartPlacing] = useState(false);
-  const [shipsPlacedBool, setShipsPlacedBool] = useState(false);
+  const [shipsPlacedBool, setShipsPlacedBool] = useState({
+    1: false,
+    2: false
+  });
   const [highlighted, setHighlighted] = useState({
     1: [],
     2: [],
@@ -46,11 +48,13 @@ function ShipsProvider({ children }) {
     6: []
   });
   const [board, setBoard] = useState(() =>
-    Array.from({ length: 100 }).reduce((acc, curr, index) => {
-      acc[index] = '';
+    Array.from({ length: 100 }).reduce((acc, _, index) => {
+      acc[index] = "";
       return acc;
     }, {})
   );
+  const [playerShipsPositions, setPlayersShipsPositions] = useState(null);
+  const [visibility, setVisibility] = useState("visible");
 
   // -----------------------------
   // 🟠 CHAT STATE
@@ -79,23 +83,23 @@ function ShipsProvider({ children }) {
   // ⚙️ HANDLERS
   // -----------------------------
   const playAgainButton = useCallback(() => {
-    socketRef.current.emit('play-again');
+    socketRef.current.emit("play-again");
     setDisplayBtn(false);
-    socketRef.current.emit('rematch', [socketId, true]);
+    socketRef.current.emit("rematch", [socketId, true]);
   }, [socketId]);
 
   useEffect(() => {
     // 🎮 SOCKET SETUP — only on game route
-    if (location.pathname === '/ships') {
+    if (location.pathname === "/ships") {
       socketRef.current = io(`${BACKEND_URL}/ships`);
 
       // --- CONNECT EVENT ---
-      socketRef.current.on('connect', () => {
+      socketRef.current.on("connect", () => {
         setSocketId(socketRef.current.id);
       });
 
       // --- LISTENERS ---
-      socketRef.current.on('listOfUsernames', (usernamesFromBackend) => {
+      socketRef.current.on("listOfUsernames", (usernamesFromBackend) => {
         setPlayersUsernamesList(usernamesFromBackend);
         if (usernamesFromBackend.length > 1) {
           setDisableChat(false);
@@ -103,41 +107,55 @@ function ShipsProvider({ children }) {
         }
       });
 
-      socketRef.current.on('send-message', (fullchat) => {
+      socketRef.current.on("send-message", (fullchat) => {
         setChat(fullchat);
       });
 
-      socketRef.current.on('play-again', (board) => {
+      socketRef.current.on("play-again", (board) => {
         setBoard(board);
         setWin(false);
         setTie(false);
         setGameOver(false);
       });
 
-      socketRef.current.on('rematch', (playersRematchDecisions) => {
+      socketRef.current.on("rematch", (playersRematchDecisions) => {
         playersRematchDecisions.forEach((val) => {
           if (val[0] === socketRef.current.id) setRematchYou(val[1]);
           else setRematchOponent(val[1]);
         });
       });
 
-      socketRef.current.on('win', (score) => {
+      socketRef.current.on("win", (score) => {
         for (const key in score) {
           if (key === socketRef.current?.id) setYourScore(score[key]);
         }
       });
 
-      socketRef.current.on('lose', (score) => {
+      socketRef.current.on("lose", (score) => {
         for (const key in score) {
           if (key !== socketRef.current?.id) setOponentScore(score[key]);
         }
       });
 
-      socketRef.current.on("Players_Ships_Placement", (shipsPlacements) => {
-        console.log(shipsPlacements, "ships placements");
-      })
+      socketRef.current.on(
+        "Players_Ships_Placement",
+        (shipsPlacementsWithId) => {
+          if (shipsPlacementsWithId.length === 2) {
+            setPlayersShipsPositions(shipsPlacementsWithId);
+            setVisibility("hidden");
+            setHighlighted({
+              1: [],
+              2: [],
+              3: [],
+              4: [],
+              5: [],
+              6: []
+            });
+          }
+        }
+      );
 
-      socketRef.current.on('playerDisconnect', () => {
+      socketRef.current.on("playerDisconnect", () => {
         setYourTurn(undefined);
         setDisableChat(false);
         setRematch(false);
@@ -162,15 +180,15 @@ function ShipsProvider({ children }) {
         setDisplayBtn(false);
         setGameOver(false);
 
-        socketRef.current.off('score');
-        socketRef.current.off('play-again');
-        socketRef.current.off('send-message');
-        socketRef.current.off('rematch');
-        socketRef.current.off('playerValues');
-        socketRef.current.off('playerDisconnect');
-        socketRef.current.off('listOfUsernames');
-        socketRef.current.off('connect');
-        socketRef.current.off('player-move');
+        socketRef.current.off("score");
+        socketRef.current.off("play-again");
+        socketRef.current.off("send-message");
+        socketRef.current.off("rematch");
+        socketRef.current.off("playerValues");
+        socketRef.current.off("playerDisconnect");
+        socketRef.current.off("listOfUsernames");
+        socketRef.current.off("connect");
+        socketRef.current.off("player-move");
 
         socketRef.current?.disconnect();
         socketRef.current = null;
@@ -182,16 +200,20 @@ function ShipsProvider({ children }) {
 
   useEffect(() => {
     if (user && socketId) {
-      socketRef.current?.emit('listOfUsernames', [user, socketRef.current?.id]);
+      socketRef.current?.emit("listOfUsernames", [user, socketRef.current?.id]);
+      setShipsPlacedBool({ [socketId]: false });
     }
   }, [user, socketId]);
 
   useEffect(() => {
     let result;
-    shipsPlacedBool ? result = Object.values(highlighted).every((x) => x.length > 0) : null;
+    const ALLTRUE = Object.values(shipsPlacedBool).every((x) => x === true);
+    ALLTRUE
+      ? (result = Object.values(highlighted).every((x) => x.length > 0))
+      : null;
     if (shipsPlacedBool && result) {
       setStartPlacing(false);
-      socketRef.current.emit('playerShipsPlacement', [highlighted, socketId])
+      socketRef.current.emit("playerShipsPlacement", [highlighted, socketId]);
     }
   }, [shipsPlacedBool, highlighted, socketId]);
 
@@ -240,6 +262,8 @@ function ShipsProvider({ children }) {
         setOponentScore,
         startPlacing,
         setShipsPlacedBool,
+        playerShipsPositions,
+        visibility
       }}
     >
       {children}

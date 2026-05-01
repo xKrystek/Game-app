@@ -6,7 +6,7 @@ import { ShipsContext } from '../context/ShipsContext.jsx';
 
 function ShipsBoard() {
   const navigate = useNavigate();
-  const { highlighted, setHighlighted, startPlacing } = useContext(ShipsContext);
+  const { highlighted, setHighlighted, startPlacing, board } = useContext(ShipsContext);
 
   const boardRef = useRef(null);
   const [boardRect, setBoardRect] = useState(null);
@@ -102,7 +102,9 @@ const onDropShip = useCallback(
               key={index}
               className="border border-white"
               style={{ background: isHighlighted ? 'lightsalmon' : undefined }}
-            />
+            >
+              {board[index]}
+            </div>
           );
         })}
         {startPlacing ? <p className='-top-10 left-1/2 -translate-y-1/2 -translate-x-1/2 absolute'>Place ships</p> : null}

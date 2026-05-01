@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, test, expect, vi, beforeEach } from 'vitest';
-import Board from '@/src/board/TicTacToeBoard';
+import Board from '@/src/tictactoe/TicTacToeBoard';
 import { TicTacToeContext } from '@/src/context/TicTacToeContext';
 import * as apiCalls from '@/src/services/apiCalls';
 import { MemoryRouter } from 'react-router-dom';
