@@ -1,6 +1,6 @@
 import React from "react";
 import Scoreboard from "../scoreboard/scoreboard";
-import ShipsBoard from "../ships/shipsBoard";
+import Canvas from "../ships/Canvas";
 import Chat from "../chat/chat";
 
 function ShipsPage() {
@@ -8,7 +8,7 @@ function ShipsPage() {
   return (
     <>
       <Scoreboard />
-      <ShipsBoard />
+      <Canvas />
       <Chat />
     </>
   );
