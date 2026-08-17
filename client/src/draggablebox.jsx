@@ -8,17 +8,18 @@ function DraggableBox() {
   const handleMouseDown = (e) => {
     setOffset({
       x: e.clientX - position.x,
-      y: e.clientY - position.y,
+      y: e.clientY - position.y
     });
     setIsDragging(true);
   };
 
   useEffect(() => {
     const handleMouseMove = (e) => {
+
       if (!isDragging) return;
       setPosition({
         x: e.clientX - offset.x,
-        y: e.clientY - offset.y,
+        y: e.clientY - offset.y
       });
     };
 
@@ -48,7 +49,7 @@ function DraggableBox() {
           position: "absolute",
           left: position.x,
           top: position.y,
-          cursor: "grab",
+          cursor: "grab"
         }}
       />
     </div>

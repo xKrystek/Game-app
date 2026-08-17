@@ -35,6 +35,8 @@ const ShipsContainer = memo(function ShipsContainer({
 
   const pendingHighlightRef = useRef(null);
 
+  console.log(visibility, "visibility");
+
   const [percentage, setPercentage] = useState(
     SHIPS.reduce((acc, id) => {
       acc[id] = { x: 90, y: 50 };

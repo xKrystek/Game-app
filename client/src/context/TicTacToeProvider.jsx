@@ -1,7 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState, useRef, useCallback, useContext } from "react";
 import { io } from "socket.io-client";
-import GameCheck from "../tictactoe/game-check/TTTGameCheck";
 import { TicTacToeContext } from "./TicTacToeContext";
 import { AuthContext } from "./AuthContext";
 
@@ -68,6 +67,7 @@ function TicTacToeProvider({ children }) {
   const [rematch, setRematch] = useState(false);
   const [rematchYou, setRematchYou] = useState(false);
   const [rematchOponent, setRematchOponent] = useState(false);
+  const [gameCheck, setGameCheck] = useState(null);
 
   // -----------------------------
   // 🔴 SOCKET STATE
@@ -178,11 +178,15 @@ function TicTacToeProvider({ children }) {
         });
       });
 
-      socketRef.current.on("win", (score) => {
+      socketRef.current.on("score", (score) => {
         for (const key in score) {
           if (key === socketRef.current?.id) setYourScore(score[key]);
         }
       });
+
+      socketRef.current.on("game_result", (gameCheck) => {
+        setGameCheck(gameCheck);
+      })
 
       socketRef.current.on("lose", (score) => {
         for (const key in score) {
@@ -270,7 +274,6 @@ function TicTacToeProvider({ children }) {
         setTie,
         displayBtn,
         setDisplayBtn,
-        GameCheck,
         yourTurn,
         setYourTurn,
         gameOver,
@@ -288,7 +291,8 @@ function TicTacToeProvider({ children }) {
         yourScore,
         setYourScore,
         oponentScore,
-        setOponentScore
+        setOponentScore,
+        gameCheck
       }}
     >
       {children}

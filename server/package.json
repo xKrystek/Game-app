@@ -5,7 +5,8 @@
   "scripts": {
     "test": "jest",
     "dev": "nodemon src/main.js",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "type": "commonjs"
   },
   "keywords": [],
   "author": "",

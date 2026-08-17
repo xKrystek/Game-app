@@ -119,8 +119,8 @@ TIC_TAC_TOE.on("connection", (socket) => {
 
       ++score[roomToJoin][WINNER];
 
-      TIC_TAC_TOE.to(WINNER).emit("win", score[roomToJoin]);
-      TIC_TAC_TOE.to(LOSER).emit("lose", score[roomToJoin]);
+      TIC_TAC_TOE.to(roomToJoin).emit("game_results", GAME_CHECK_RESULT);
+      TIC_TAC_TOE.to(roomToJoin).emit("score", score[roomToJoin]);
     }
 
     console.log(score, "score");
@@ -177,11 +177,7 @@ TIC_TAC_TOE.on("connection", (socket) => {
       rematchState[roomToJoin][1][1] = false;
     }
   });
-
-  socket.on("score", (score) => {
-    TIC_TAC_TOE.to(roomToJoin).emit("score", score);
-  });
-
+  
   // On received message
   socket.on("send-message", (arrayOfMessages) => {
     fullChat[roomToJoin].push(arrayOfMessages);
@@ -235,7 +231,10 @@ TIC_TAC_TOE.on("connection", (socket) => {
     console.log(TIC_TAC_TOE.adapter.rooms, "all rooms");
     console.log(TIC_TAC_TOE.adapter.rooms.size, "amount of rooms");
   });
-});
+
+
+  });
+
 
 const SHIPS = io.of("/ships");
 
@@ -293,10 +292,6 @@ SHIPS.on("connection", (socket) => {
     ) {
       SHIPS.to(roomToJoin).emit("play-again", {});
     }
-  });
-
-  socket.on("score", (score) => {
-    SHIPS.to(roomToJoin).emit("score", score);
   });
 
   // On received message

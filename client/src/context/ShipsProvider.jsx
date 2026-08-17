@@ -1,7 +1,6 @@
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { ShipsContext } from "./ShipsContext";
 import { io } from "socket.io-client";
-import GameCheck from "../tictactoe/game-check/TTTGameCheck";
 import { AuthContext } from "./AuthContext";
 
 const getBackendUrl = () => {
@@ -140,7 +139,7 @@ function ShipsProvider({ children }) {
       socketRef.current.on(
         "Players_Ships_Placement",
         (shipsPlacementsWithId) => {
-          if (shipsPlacementsWithId.length === 2) {
+          if (Object.keys(shipsPlacementsWithId).length === 2) {
             setPlayersShipsPositions(shipsPlacementsWithId);
             setVisibility("hidden");
             setHighlighted({
@@ -241,7 +240,6 @@ function ShipsProvider({ children }) {
         setTie,
         displayBtn,
         setDisplayBtn,
-        GameCheck,
         yourTurn,
         setYourTurn,
         gameOver,

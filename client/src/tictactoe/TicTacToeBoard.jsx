@@ -15,7 +15,7 @@ function Board() {
     setDisplayBtn,
     handleBoardOnClick,
     playAgainButton,
-    GameCheck,
+    gameCheck,
     yourTurn,
     setYourTurn,
     gameOver,
@@ -30,11 +30,11 @@ function Board() {
   };
 
   useEffect(() => {
-    if (GameCheck(board) === 'O' || GameCheck(board) === 'X') {
+    if (gameCheck === 'O' || gameCheck === 'X') {
       setGameOver(true);
       setDisplayBtn(true);
       setRematch(true);
-    } else if (GameCheck(board) === 'tie') {
+    } else if (gameCheck === 'tie') {
       setYourTurn(undefined);
       setTie(!tie);
       setDisplayBtn(true);
@@ -56,7 +56,7 @@ function Board() {
       <div className="flex justify-center items-center h-1/2 w-1/2">
         <div
           onClick={
-            !GameCheck(board) ? (event) => handleBoardOnClick(event) : null
+            !gameCheck ? (event) => handleBoardOnClick(event) : null
           }
           className="lg:text-8xl md:text-6xl sm:text-4xl text-2xl text-center grid grid-cols-3 grid-rows-3 2xl:gap-3 gap-1 sm:gap-2 w-4/5 lg:w-3/4 xl:w-3/5 aspect-square self-center relative"
         >
@@ -71,7 +71,7 @@ function Board() {
           })}
           {gameOver ? (
             <p className="animation1 text-[2rem] 2xl:text-[1.5vw] xl:text-[2vw] translate-x-1/2 translate-y-1/2 top-[15%] right-[51%] fixed">
-              {GameCheck(board) === player ? 'You won' : 'You lost'}
+              {gameCheck === player ? 'You won' : 'You lost'}
             </p>
           ) : null}
           {tie ? (
