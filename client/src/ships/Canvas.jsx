@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef, useState } from "react";
 
-import { drawBoard } from "../scripts/canvas_scripts";
+import { drawBoard, drawShip } from "../scripts/canvas_scripts";
 
 function Canvas() {
   const canvasRef = useRef(null);
@@ -20,16 +20,21 @@ function Canvas() {
     canvas.height = WINDOW_HEIGHT;
     canvas.width = WINDOW_WIDTH;
 
+    const HEIGHT = window.innerHeight * 0.3;
     const WIDTH = window.innerWidth * 0.3;
-    const HEIGHT = WIDTH;
-    const LEFT = canvas.width / 2 - WIDTH / 2;
-    const TOP = canvas.height / 2 - HEIGHT / 2;
-    const RIGHT = canvas.width / 2 + WIDTH / 2;
-    const BOTTOM = canvas.height / 2 + HEIGHT / 2;
+
+    const BORDER_SIZE = HEIGHT < WIDTH ? WIDTH : HEIGHT;
+    const NUMBER_OF_FIELDS = 10;
+    const SHIP_SIZE_UNIT = BORDER_SIZE / NUMBER_OF_FIELDS;
+    const LEFT = canvas.width / 2 - BORDER_SIZE / 2;
+    const TOP = canvas.height / 2 - BORDER_SIZE / 2;
+    const RIGHT = canvas.width / 2 + BORDER_SIZE / 2;
+    const BOTTOM = canvas.height / 2 + BORDER_SIZE / 2;
 
     ctx.strokeStyle = "white";
     // ctx.strokeRect(LEFT, TOP, WIDTH, HEIGHT);
-    drawBoard(ctx, 10, WIDTH, HEIGHT, LEFT, TOP, RIGHT, BOTTOM, 5);
+    drawBoard(ctx, NUMBER_OF_FIELDS, BORDER_SIZE, LEFT, TOP, RIGHT, BOTTOM, 4);
+    drawShip(ctx, 6, WINDOW_WIDTH, TOP, SHIP_SIZE_UNIT);
   }, [WINDOW_WIDTH, WINDOW_HEIGHT]);
 
   return <canvas width={100} height={100} ref={canvasRef}></canvas>;

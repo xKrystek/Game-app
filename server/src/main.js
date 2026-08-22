@@ -12,7 +12,7 @@ const healthCheck = require("./controllers/status-check.js");
 const scoreHandler = require("./scripts/scoreHandler.js");
 const GameCheck = require("./scripts/TTTGameCheck.js");
 const assignPlayerValuesAndEmitShips = require("./scripts/ShipsPlayerValues.js");
-const uuid = require("uuid");
+// const uuid = require("uuid");
 
 const app = express();
 require("./database/db.js");

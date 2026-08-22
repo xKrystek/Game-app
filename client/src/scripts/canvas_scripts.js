@@ -4,79 +4,21 @@
 export function drawBoard(
   ctx,
   numberOfFields,
-  width,
-  height,
+  border_size,
   left,
   top,
   right,
   bottom,
   gap = 0
 ) {
-  const Field_size = (width - gap * (numberOfFields - 1)) / numberOfFields;
+  const Field_size = (border_size - gap * (numberOfFields - 1)) / numberOfFields;
 
-  // console.log(Field_size, "size of the one box");
-  // console.log(width, "width of the whole board");
-  if (width >= Field_size * numberOfFields + gap * (numberOfFields - 1)) {
+  console.log(Field_size, "size of the one box");
+  console.log(border_size, "width of the whole board");
     if (gap) {
-      for (let i = 0; i <= numberOfFields; i++) {
-        switch (i) {
-          case 0:
-            // horizontal
-            ctx.beginPath();
-            ctx.moveTo(left, top + i * Field_size);
-            ctx.lineTo(right, top + i * Field_size);
-            ctx.stroke();
-            ctx.closePath();
-
-            //vertical
-            ctx.beginPath();
-            ctx.moveTo(left + i * Field_size, top);
-            ctx.lineTo(left + i * Field_size, bottom);
-            ctx.stroke();
-            ctx.closePath();
-            break;
-          case numberOfFields:
-            ctx.strokeStyle = "red";
-            // horizontal
-            ctx.beginPath();
-            ctx.moveTo(left, top + i * Field_size + gap * (numberOfFields - 1));
-            ctx.lineTo(right, top + i * Field_size + gap * (numberOfFields - 1));
-            ctx.stroke();
-            ctx.closePath();
-
-            //vertical
-            ctx.beginPath();
-            ctx.moveTo(left + i * Field_size + gap * (numberOfFields - 1), top);
-            ctx.lineTo(left + i * Field_size + gap * (numberOfFields - 1), bottom);
-            ctx.stroke();
-            ctx.closePath();
-            break;
-          default:
-            // horizontal
-            ctx.beginPath();
-            ctx.moveTo(left, top + i * Field_size - gap / 2 + i * gap);
-            ctx.lineTo(right, top + i * Field_size - gap / 2 + i * gap);
-            ctx.stroke();
-            ctx.closePath();
-
-            ctx.beginPath();
-            ctx.moveTo(left, top + i * Field_size + gap / 2 + i * gap);
-            ctx.lineTo(right, top + i * Field_size + gap / 2 + i * gap);
-            ctx.stroke();
-            ctx.closePath();
-
-            // vertical
-            ctx.beginPath();
-            ctx.moveTo(left + i * Field_size - gap / 2 + i * gap, top);
-            ctx.lineTo(left + i * Field_size - gap / 2 + i * gap, bottom);
-            ctx.stroke();
-            ctx.closePath();
-
-            ctx.beginPath();
-            ctx.moveTo(left + i * Field_size + gap / 2 + i * gap, top);
-            ctx.lineTo(left + i * Field_size + gap / 2 + i * gap, bottom);
-            ctx.stroke();
-            ctx.closePath();
+      for (let i = 0; i < numberOfFields; i++) {
+        for(let j = 0; j < numberOfFields; j++){
+          ctx.strokeRect(left + j * (Field_size + gap), top + i * (Field_size + gap), Field_size, Field_size);
         }
       }
     } else {
@@ -96,7 +38,16 @@ export function drawBoard(
         ctx.closePath();
       }
     }
-  } else {
-    console.log("inproper dimensions");
-  }
+}
+
+/**
+ * @param {CanvasRenderingContext2D} ctx
+ */
+
+export function drawShip(ctx, size, x, y, shipSizeUnit){
+  const SHIP_HEIGHT = shipSizeUnit * size;
+  const SHIP_WIDTH = shipSizeUnit;
+
+  ctx.strokeRect(x - SHIP_WIDTH - 15, y, SHIP_WIDTH, SHIP_HEIGHT);
+  ctx.strokeText("6", x - SHIP_WIDTH / 3 * 2 - 15, y + 15);
 }
