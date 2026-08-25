@@ -1,9 +1,20 @@
 export class Game_Engine {
   /**
-   * @type {CanvasRenderingContext2D}
-   */ ctx;
-  constructor(ctx) {
+   * @param {CanvasRenderingContext2D} ctx
+   * @param {Ship} ship
+   * @param {Board} board
+   */
+  constructor(ctx, ship, board) {
     this.ctx = ctx;
+    this.ship = ship;
+    this.board = board;
+  }
+
+  checkField(){
+    const snapPoints = [];
+    for(let i = 1; i <= this.board.numberOfFields - 1; i++){
+      snapPoints.push(this.board.Field_size + this.board.gap / 2);
+    }
   }
 
   clearCanvas() {
@@ -34,10 +45,10 @@ export class Board {
     this.bottom = bottom;
     this.gap = gap;
   }
+
+  Field_size = (this.border_size - this.gap * (this.numberOfFields - 1)) / this.numberOfFields;
+
   drawBoard() {
-    const Field_size =
-      (this.border_size - this.gap * (this.numberOfFields - 1)) /
-      this.numberOfFields;
 
     if (this.gap) {
       for (let i = 0; i < this.numberOfFields; i++) {

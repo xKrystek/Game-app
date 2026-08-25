@@ -6,7 +6,6 @@ function Canvas() {
   const canvasRef = useRef(null);
   const [WINDOW_WIDTH, setWINDOW_WIDTH] = useState(window.innerWidth);
   const [WINDOW_HEIGHT, setWindow_HEIGHT] = useState(window.innerHeight);
-  const shipRef = useRef(null);
   const draggingShip = useRef(false);
   const offset = useRef(null);
 
@@ -24,7 +23,7 @@ function Canvas() {
     ) {
       offset.current = {
         x: ship.x - e.clientX,
-        y: ship.y - e.clientY
+        y: ship.y - e.clientY,
       };
       draggingShip.current = true;
     }
@@ -64,20 +63,30 @@ function Canvas() {
 
     const SHIP_SIZE_UNIT = BORDER_SIZE / NUMBER_OF_FIELDS;
 
-    const GAME_ENGINE = new Game_Engine(ctx);
-
     const SHIP_6 = new Ship(ctx, 6, WINDOW_WIDTH, TOP, SHIP_SIZE_UNIT);
-    shipRef.current = SHIP_6;
 
     ctx.strokeStyle = "white";
-    const ShipsBoard = new Board(ctx, NUMBER_OF_FIELDS, BORDER_SIZE, LEFT, TOP, RIGHT, BOTTOM, 4);
+    const ShipsBoard = new Board(
+      ctx,
+      NUMBER_OF_FIELDS,
+      BORDER_SIZE,
+      LEFT,
+      TOP,
+      RIGHT,
+      BOTTOM,
+      4,
+    );
     ShipsBoard.drawBoard();
 
     SHIP_6.drawShip();
 
+    const GAME_ENGINE = new Game_Engine(ctx, SHIP_6, ShipsBoard);
+
     window.addEventListener("resize", handleResize);
     window.addEventListener("mousedown", (e) => setOffset(e, SHIP_6));
-    window.addEventListener("mousemove", (e) => dragShips(e, SHIP_6, GAME_ENGINE, ShipsBoard));
+    window.addEventListener("mousemove", (e) =>
+      dragShips(e, SHIP_6, GAME_ENGINE, ShipsBoard),
+    );
     window.addEventListener("mouseup", () => {
       draggingShip.current = false;
     });
