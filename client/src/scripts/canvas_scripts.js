@@ -8,13 +8,31 @@ export class Game_Engine {
     this.ctx = ctx;
     this.ship = ship;
     this.board = board;
+    this.snapPointsX = [];
+    this.snapPointsY = [];
   }
 
   checkField(){
-    const snapPoints = [];
+    this.ctx.save();
     for(let i = 1; i <= this.board.numberOfFields - 1; i++){
-      snapPoints.push(this.board.Field_size + this.board.gap / 2);
+      this.snapPointsX.push(i * (this.board.Field_size + this.board.gap ) + this.board.left - this.board.gap / 2);
+      this.snapPointsY.push(i * (this.board.Field_size + this.board.gap ) + this.board.top - this.board.gap / 2);
     }
+    this.ctx.beginPath();
+    this.snapPointsX.forEach(x => {
+      this.ctx.strokeStyle = "green";
+      this.ctx.moveTo(x, this.board.top);
+      this.ctx.lineTo(x, this.board.bottom);
+      this.ctx.stroke();
+    })
+    this.ctx.beginPath();
+    this.snapPointsY.forEach(y => {
+      this.ctx.strokeStyle = "red";
+      this.ctx.moveTo(this.board.left, y);
+      this.ctx.lineTo(this.board.right, y);
+      this.ctx.stroke();
+    })
+    this.ctx.restore();
   }
 
   clearCanvas() {
@@ -35,6 +53,7 @@ export class Board {
     right,
     bottom,
     gap = 0,
+    Field_size
   ) {
     this.ctx = ctx;
     this.numberOfFields = numberOfFields;
@@ -44,9 +63,9 @@ export class Board {
     this.right = right;
     this.bottom = bottom;
     this.gap = gap;
+    this.Field_size = Field_size;
   }
 
-  Field_size = (this.border_size - this.gap * (this.numberOfFields - 1)) / this.numberOfFields;
 
   drawBoard() {
 
@@ -54,10 +73,10 @@ export class Board {
       for (let i = 0; i < this.numberOfFields; i++) {
         for (let j = 0; j < this.numberOfFields; j++) {
           this.ctx.strokeRect(
-            this.left + j * (Field_size + this.gap),
-            this.top + i * (Field_size + this.gap),
-            Field_size,
-            Field_size,
+            this.left + j * (this.Field_size + this.gap),
+            this.top + i * (this.Field_size + this.gap),
+            this.Field_size,
+            this.Field_size,
           );
         }
       }
@@ -65,15 +84,15 @@ export class Board {
       for (let i = 0; i <= this.numberOfFields; i++) {
         // horizontal
         this.ctx.beginPath();
-        this.ctx.moveTo(this.left, this.top + i * Field_size);
-        this.ctx.lineTo(this.right, this.top + i * Field_size);
+        this.ctx.moveTo(this.left, this.top + i * this.Field_size);
+        this.ctx.lineTo(this.right, this.top + i * this.Field_size);
         this.ctx.stroke();
         this.ctx.closePath();
 
         // vertical
         this.ctx.beginPath();
-        this.ctx.moveTo(this.left + i * Field_size, this.top);
-        this.ctx.lineTo(this.left + i * Field_size, this.bottom);
+        this.ctx.moveTo(this.left + i * this.Field_size, this.top);
+        this.ctx.lineTo(this.left + i * this.Field_size, this.bottom);
         this.ctx.stroke();
         this.ctx.closePath();
       }
@@ -87,11 +106,11 @@ export class Ship {
    */
   ctx;
 
-  constructor(ctx, size, x, y, shipSizeUnit) {
+  constructor(ctx, size, x, y, shipSizeUnit, gap) {
     this.ctx = ctx;
     this.size = size;
     this.shipSizeUnit = shipSizeUnit;
-    this.SHIP_HEIGHT = shipSizeUnit * size;
+    this.SHIP_HEIGHT = shipSizeUnit * size + (size - 1) * gap;
     this.SHIP_WIDTH = shipSizeUnit;
     this.x = x - this.SHIP_WIDTH - 15;
     this.y = y;
@@ -106,7 +125,8 @@ export class Ship {
     const actualFontHeight =
       metricsOfText.actualBoundingBoxAscent +
       metricsOfText.actualBoundingBoxDescent;
-    this.ctx.strokeText("6", x + this.SHIP_WIDTH / 2, y + actualFontHeight);
+    const number = this.size.toString();
+    this.ctx.strokeText(number, x + this.SHIP_WIDTH / 2, y + actualFontHeight);
     this.setPosition(x, y);
   }
   setPosition(x, y) {

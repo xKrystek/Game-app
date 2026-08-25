@@ -14,6 +14,10 @@ function Canvas() {
     setWindow_HEIGHT(window.innerHeight);
   };
 
+  /**
+   * @param {Event} e 
+   * @param {Ship} ship 
+   */
   const setOffset = (e, ship) => {
     if (
       e.clientX > ship.x &&
@@ -27,6 +31,24 @@ function Canvas() {
       };
       draggingShip.current = true;
     }
+    console.log(e.clientX);
+  };
+
+  /**
+   * @param {Event} e 
+   * @param {Ship} ship 
+   */
+
+  const cursorStyle = (e, ship) => {
+    if (
+      e.clientX > ship.x &&
+      e.clientY > ship.y &&
+      e.clientX < ship.x + ship.SHIP_WIDTH &&
+      e.clientY < ship.y + ship.SHIP_HEIGHT
+    ) {
+      e.target.style.cursor = "pointer";
+      console.log("triggered");
+    } else e.target.style.cursor = "default";
   };
 
   /**
@@ -38,6 +60,7 @@ function Canvas() {
   const dragShips = (e, ship, gameEngine, board) => {
     if (draggingShip.current) {
       gameEngine.clearCanvas();
+      // gameEngine.checkField();
       board.drawBoard();
       ship.drawShip(e.clientX + offset.current.x, e.clientY + offset.current.y);
     }
@@ -60,10 +83,12 @@ function Canvas() {
     const TOP = canvas.height / 2 - BORDER_SIZE / 2;
     const RIGHT = canvas.width / 2 + BORDER_SIZE / 2;
     const BOTTOM = canvas.height / 2 + BORDER_SIZE / 2;
+    const GAP = 10;
 
-    const SHIP_SIZE_UNIT = BORDER_SIZE / NUMBER_OF_FIELDS;
+    const SHIP_SIZE_UNIT = (BORDER_SIZE - GAP * (NUMBER_OF_FIELDS - 1)) / NUMBER_OF_FIELDS;
+    console.log(SHIP_SIZE_UNIT);
 
-    const SHIP_6 = new Ship(ctx, 6, WINDOW_WIDTH, TOP, SHIP_SIZE_UNIT);
+    const SHIP_6 = new Ship(ctx, 6, WINDOW_WIDTH, TOP, SHIP_SIZE_UNIT, GAP);
 
     ctx.strokeStyle = "white";
     const ShipsBoard = new Board(
@@ -74,18 +99,22 @@ function Canvas() {
       TOP,
       RIGHT,
       BOTTOM,
-      4,
+      GAP,
+      SHIP_SIZE_UNIT
     );
     ShipsBoard.drawBoard();
 
     SHIP_6.drawShip();
 
     const GAME_ENGINE = new Game_Engine(ctx, SHIP_6, ShipsBoard);
+    // GAME_ENGINE.checkField();
 
     window.addEventListener("resize", handleResize);
     window.addEventListener("mousedown", (e) => setOffset(e, SHIP_6));
-    window.addEventListener("mousemove", (e) =>
-      dragShips(e, SHIP_6, GAME_ENGINE, ShipsBoard),
+    window.addEventListener("mousemove", (e) => {
+      dragShips(e, SHIP_6, GAME_ENGINE, ShipsBoard);
+      cursorStyle(e, SHIP_6);
+    }
     );
     window.addEventListener("mouseup", () => {
       draggingShip.current = false;
