@@ -1,3 +1,5 @@
+import { BotOff } from "lucide-react";
+
 export class Game_Engine {
   /**
    * @param {CanvasRenderingContext2D} ctx
@@ -12,27 +14,79 @@ export class Game_Engine {
     this.snapPointsY = [];
   }
 
-  checkField(){
+  snapPoints() {
     this.ctx.save();
-    for(let i = 1; i <= this.board.numberOfFields - 1; i++){
-      this.snapPointsX.push(i * (this.board.Field_size + this.board.gap ) + this.board.left - this.board.gap / 2);
-      this.snapPointsY.push(i * (this.board.Field_size + this.board.gap ) + this.board.top - this.board.gap / 2);
+    for (let i = 1; i <= this.board.numberOfFields - 1; i++) {
+      this.snapPointsX.push(
+        i * (this.board.Field_size + this.board.gap) +
+          this.board.left -
+          this.board.gap / 2
+      );
+      this.snapPointsY.push(
+        i * (this.board.Field_size + this.board.gap) +
+          this.board.top -
+          this.board.gap / 2
+      );
     }
+  }
+
+  drawSnapPoints() {
+    this.ctx.save();
     this.ctx.beginPath();
-    this.snapPointsX.forEach(x => {
+    this.snapPointsX.forEach((x) => {
       this.ctx.strokeStyle = "green";
       this.ctx.moveTo(x, this.board.top);
       this.ctx.lineTo(x, this.board.bottom);
       this.ctx.stroke();
-    })
+    });
     this.ctx.beginPath();
-    this.snapPointsY.forEach(y => {
+    this.snapPointsY.forEach((y) => {
       this.ctx.strokeStyle = "red";
       this.ctx.moveTo(this.board.left, y);
       this.ctx.lineTo(this.board.right, y);
       this.ctx.stroke();
-    })
+    });
     this.ctx.restore();
+  }
+
+  snapShips() {
+
+    console.log(this.checkIfInBoundaries());
+
+    if (this.checkIfInBoundaries()) {
+      const index_X = this.snapPointsX.findIndex(
+        (x) => x > this.ship.x + this.ship.SHIP_WIDTH / 2
+      );
+      const index_Y = this.snapPointsY.findIndex((y) => y > this.ship.y);
+
+      this.ship.drawShip(
+        this.board.left + (this.board.Field_size + this.board.gap) * index_X,
+        this.board.top + (this.board.Field_size + this.board.gap) * index_Y
+      );
+    }
+  }
+
+  checkIfInBoundaries() {
+    console.log(this.ship.x);
+    console.log(this.board.left, "board left");
+    // console.log(this.ship.left, "ship left");
+    console.log(this.board.right, "board right");
+    console.log(this.ship.x + this.ship.SHIP_WIDTH);
+    // console.log(this.ship.right, "ship right");
+    console.log(this.board.top, "board top");
+    console.log(this.ship.y)
+    // console.log(this.ship.top, "ship top");
+    console.log(this.board.bottom, "board bottom");
+    console.log(this.ship.y + this.ship.SHIP_HEIGHT)
+    // console.log(this.ship.bottom, "ship bottom");
+    if (
+      this.ship.x > this.board.left &&
+      this.ship.y > this.board.top &&
+      this.ship.x + this.ship.SHIP_WIDTH < this.board.right &&
+      this.ship.y + this.ship.SHIP_HEIGHT < this.board.bottom
+    )
+      return true;
+    else return false;
   }
 
   clearCanvas() {
@@ -66,9 +120,7 @@ export class Board {
     this.Field_size = Field_size;
   }
 
-
   drawBoard() {
-
     if (this.gap) {
       for (let i = 0; i < this.numberOfFields; i++) {
         for (let j = 0; j < this.numberOfFields; j++) {
@@ -76,7 +128,7 @@ export class Board {
             this.left + j * (this.Field_size + this.gap),
             this.top + i * (this.Field_size + this.gap),
             this.Field_size,
-            this.Field_size,
+            this.Field_size
           );
         }
       }

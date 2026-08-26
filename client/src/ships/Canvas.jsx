@@ -31,7 +31,6 @@ function Canvas() {
       };
       draggingShip.current = true;
     }
-    console.log(e.clientX);
   };
 
   /**
@@ -47,7 +46,6 @@ function Canvas() {
       e.clientY < ship.y + ship.SHIP_HEIGHT
     ) {
       e.target.style.cursor = "pointer";
-      console.log("triggered");
     } else e.target.style.cursor = "default";
   };
 
@@ -60,7 +58,6 @@ function Canvas() {
   const dragShips = (e, ship, gameEngine, board) => {
     if (draggingShip.current) {
       gameEngine.clearCanvas();
-      // gameEngine.checkField();
       board.drawBoard();
       ship.drawShip(e.clientX + offset.current.x, e.clientY + offset.current.y);
     }
@@ -86,10 +83,10 @@ function Canvas() {
     const GAP = 10;
 
     const SHIP_SIZE_UNIT = (BORDER_SIZE - GAP * (NUMBER_OF_FIELDS - 1)) / NUMBER_OF_FIELDS;
-    console.log(SHIP_SIZE_UNIT);
 
-    const SHIP_6 = new Ship(ctx, 6, WINDOW_WIDTH, TOP, SHIP_SIZE_UNIT, GAP);
-
+    
+    const SHIP_6 = new Ship(ctx, 5, WINDOW_WIDTH, TOP, SHIP_SIZE_UNIT, GAP);
+    
     ctx.strokeStyle = "white";
     const ShipsBoard = new Board(
       ctx,
@@ -103,11 +100,11 @@ function Canvas() {
       SHIP_SIZE_UNIT
     );
     ShipsBoard.drawBoard();
-
+    
     SHIP_6.drawShip();
-
+    
     const GAME_ENGINE = new Game_Engine(ctx, SHIP_6, ShipsBoard);
-    // GAME_ENGINE.checkField();
+    GAME_ENGINE.snapPoints();
 
     window.addEventListener("resize", handleResize);
     window.addEventListener("mousedown", (e) => setOffset(e, SHIP_6));
@@ -117,7 +114,12 @@ function Canvas() {
     }
     );
     window.addEventListener("mouseup", () => {
-      draggingShip.current = false;
+      if(GAME_ENGINE.checkIfInBoundaries() && draggingShip.current){
+        GAME_ENGINE.clearCanvas();
+        GAME_ENGINE.board.drawBoard();
+        GAME_ENGINE.snapShips();
+      }
+        draggingShip.current = false;
     });
 
     return () => {
